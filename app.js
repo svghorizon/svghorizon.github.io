@@ -233,6 +233,12 @@ function renderHome() {
     </div>
     <div id="res"></div>
   </section>
+  <a class="exam-cta" href="exams.html">
+    <span class="cta-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M15.5 16.5l1.5 1.5 3-3"/></svg></span>
+    <span class="cta-text"><span class="cta-t">Practice Exams</span><span class="cta-ta" lang="ta">பயிற்சித் தேர்வுகள்</span>
+      <span class="cta-d">Free online tests with instant results · See the exam calendar</span></span>
+    <span class="cta-go" aria-hidden="true">→</span>
+  </a>
   <h2 class="sec-head">Choose your exam <span>${ready} notes ready to read</span></h2>
   <div class="exams">` +
   Object.entries(DATA).map(([id, e]) => {

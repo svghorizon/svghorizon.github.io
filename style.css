@@ -256,3 +256,17 @@ header.bar{position:sticky;top:0;z-index:20;background:var(--bar);color:var(--on
 .back{margin-top:28px;background:none;border:1px solid var(--rule);border-radius:999px;padding:9px 18px;font-size:14.5px;color:var(--ink-soft)}
 .back:hover{border-color:var(--amber);color:var(--ink)}
 footer{border-top:1px solid var(--rule);margin-top:48px;padding-top:18px;font-size:13px;color:var(--ink-soft);text-align:center}
+
+/* ---------- Practice Exams button on the home page (below the search) ---------- */
+.exam-cta{display:flex;align-items:center;gap:16px;margin:26px auto 0;max-width:560px;padding:18px 20px;border-radius:var(--radius);
+  background:var(--bar);color:var(--on-bar);text-decoration:none;border:2px solid var(--amber);box-shadow:var(--lift);
+  transition:transform .15s ease}
+.exam-cta:hover{transform:translateY(-2px)}
+.exam-cta .cta-ic{width:56px;height:56px;flex:none;border-radius:14px;background:var(--amber);color:var(--bar);display:grid;place-items:center}
+.exam-cta .cta-ic svg{width:30px;height:30px}
+.exam-cta .cta-text{display:flex;flex-direction:column;flex:1;min-width:0}
+.exam-cta .cta-t{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.1}
+.exam-cta .cta-ta{font-family:var(--f-display);font-size:15px;color:var(--amber);font-weight:600;margin-top:2px}
+.exam-cta .cta-d{font-size:13.5px;color:var(--on-bar-soft);margin-top:4px}
+.exam-cta .cta-go{font-size:26px;color:var(--amber);flex:none}
+@media (max-width:420px){.exam-cta{gap:12px;padding:15px 14px}.exam-cta .cta-ic{width:48px;height:48px}.exam-cta .cta-t{font-size:21px}}
