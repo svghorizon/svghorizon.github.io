@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exams · SVG Horizon</title>
+<meta name="description" content="Free online practice exams for students of Sivagangai district.">
+<meta name="theme-color" content="#13203A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Tamil:wdth,wght@100..125,400..800&family=Hind+Madurai:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ============================================================
+   SVG Horizon — exam pages (extra styles; colours come from style.css)
+   ============================================================ */
+.bar-link{background:none;border:1px solid rgba(245,243,236,.22);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--on-bar-soft);text-decoration:none;white-space:nowrap}
+.bar-link:hover{color:var(--on-bar);border-color:var(--amber)}
+.muted{color:var(--ink-soft);font-size:14.5px}
+.ta{font-family:var(--f-display)}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:18px;box-shadow:var(--lift);margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:12px 22px;font-weight:600;font-size:16px;
+  background:var(--bar);color:var(--on-bar);text-decoration:none;min-height:46px}
+.btn.amber{background:var(--amber);color:#1b1405}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--rule)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn.wide{width:100%}
+.note-box{border-radius:12px;padding:12px 14px;font-size:15px;margin:12px 0}
+.note-box.info{background:var(--tint)}
+.note-box.warn{background:var(--amber-soft);color:var(--amber-ink)}
+.note-box.err{background:#fde7e6;color:#9b2c24}
+:root[data-theme="dark"] .note-box.err{background:#3a1b1a;color:#f2b3ad}
+.note-box.ok{background:var(--ready-soft);color:var(--ready)}
+
+/* calendar */
+.cal{display:grid;gap:12px}
+.ex-card{display:grid;grid-template-columns:64px 1fr;gap:14px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:16px;box-shadow:var(--lift)}
+.ex-card.live{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+.date{width:64px;border-radius:12px;background:var(--bar);color:var(--on-bar);text-align:center;padding:8px 0;align-self:start}
+.date b{display:block;font-family:var(--f-display);font-size:26px;line-height:1}
+.date span{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--amber)}
+.ex-title{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.25;margin:0}
+.ex-meta{font-size:14px;color:var(--ink-soft);margin:3px 0 0}
+.ex-topics{font-size:14.5px;margin:6px 0 0}
+.ex-act{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--rule);padding-top:12px}
+.ex-act .when{font-size:14px;color:var(--ink-soft)}
+.ex-act .when b{color:var(--ink)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--tint);color:var(--ink-soft);margin-left:6px;vertical-align:2px}
+.tag.live{background:var(--amber);color:#1b1405}
+
+/* form */
+.field{margin-bottom:14px}
+.field label{display:block;font-weight:600;font-size:15px;margin-bottom:5px}
+.field label small{font-weight:400;color:var(--ink-soft)}
+.field input,.field select{width:100%;padding:13px 14px;font:inherit;font-size:16px;border:1px solid var(--rule);border-radius:12px;background:var(--surface);color:var(--ink)}
+.field input:focus,.field select:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 4px var(--amber-soft)}
+.rules{margin:0;padding-left:20px;font-size:15px}
+.rules li{margin-bottom:6px}
+
+/* waiting room */
+.big-count{font-family:var(--f-display);font-weight:700;font-size:clamp(46px,14vw,78px);text-align:center;line-height:1;margin:18px 0 6px;font-variant-numeric:tabular-nums}
+.center{text-align:center}
+
+/* exam mode */
+body.exam-mode header.bar, body.exam-mode footer{display:none}
+.xbar{position:sticky;top:0;z-index:30;background:var(--bar);color:var(--on-bar);border-bottom:3px solid var(--amber);margin:0 -18px 14px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.xbar .tt{flex:1;min-width:120px;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer{font-family:var(--f-display);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.08);padding:3px 12px;border-radius:10px}
+.timer.low{background:#b4463c;color:#fff}
+.seg{display:inline-flex;border:1px solid rgba(245,243,236,.25);border-radius:999px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--on-bar-soft);padding:6px 11px;font-size:13px}
+.seg button.on{background:var(--amber);color:#1b1405;font-weight:700}
+.xbar .pal-btn{background:none;border:1px solid rgba(245,243,236,.25);color:var(--on-bar);border-radius:999px;padding:6px 12px;font-size:13px}
+.qhead{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink-soft);margin-bottom:8px}
+.qtext{font-size:18.5px;line-height:1.5;font-weight:600;margin:0 0 4px}
+.qtext.ta{font-weight:500;font-size:18px}
+.qsep{height:1px;background:var(--rule);margin:10px 0}
+.opts{display:grid;gap:10px;margin-top:14px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--surface);border:1.5px solid var(--rule);border-radius:14px;padding:13px 14px;min-height:54px}
+.opt .l{flex:none;width:30px;height:30px;border-radius:50%;background:var(--tint);display:grid;place-items:center;font-weight:700}
+.opt .o{display:flex;flex-direction:column;gap:2px;font-size:16.5px;line-height:1.4}
+.opt .o .ta{font-size:16px;color:var(--ink-soft)}
+.opt.sel{border-color:var(--amber);background:var(--amber-soft)}
+.opt.sel .l{background:var(--amber);color:#1b1405}
+.qnav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.qnav .full{grid-column:1/-1}
+.mark.on{background:var(--amber-soft);color:var(--amber-ink);border-color:var(--amber)}
+
+/* palette */
+.overlay{position:fixed;inset:0;background:rgba(10,17,32,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--paper);width:100%;max-width:780px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
+@media (min-width:700px){.overlay{align-items:center}.sheet{border-radius:18px}}
+.grid-q{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px;margin:12px 0}
+.grid-q button{height:44px;border-radius:10px;border:1.5px solid var(--rule);background:var(--surface);font-weight:600;font-variant-numeric:tabular-nums}
+.grid-q button.ans{background:var(--ready);border-color:var(--ready);color:#fff}
+.grid-q button.mrk{background:var(--amber);border-color:var(--amber);color:#1b1405}
+.grid-q button.cur{outline:3px solid var(--engineering);outline-offset:1px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--ink-soft)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px;border:1.5px solid var(--rule)}
+.counts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.counts div{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:10px;text-align:center}
+.counts b{display:block;font-family:var(--f-display);font-size:24px}
+.counts span{font-size:12.5px;color:var(--ink-soft)}
+
+/* result */
+.score{text-align:center;padding:22px 16px}
+.score .num{font-family:var(--f-display);font-weight:700;font-size:clamp(44px,13vw,68px);line-height:1}
+.score .num small{font-size:.45em;color:var(--ink-soft)}
+.score .pct{font-size:17px;color:var(--ink-soft);margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th,.tbl td{padding:9px 6px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:middle}
+.tbl th{font-size:12.5px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.lvl{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.lvl.s{background:var(--ready-soft);color:var(--ready)}
+.lvl.p{background:var(--amber-soft);color:var(--amber-ink)}
+.lvl.w{background:#fde7e6;color:#9b2c24}
+:root[data-theme="dark"] .lvl.w{background:#3a1b1a;color:#f2b3ad}
+.mini{height:7px;border-radius:99px;background:var(--tint);overflow:hidden;min-width:60px}
+.mini span{display:block;height:100%;background:var(--ready)}
+.study a{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none}
+.study a:hover{color:var(--amber-ink)}
+.rev{border-top:1px solid var(--rule);padding:14px 0}
+.rev .opt{cursor:default;min-height:0;padding:9px 12px}
+.rev .opt.right{border-color:var(--ready);background:var(--ready-soft)}
+.rev .opt.wrong{border-color:#b4463c;background:#fde7e6}
+:root[data-theme="dark"] .rev .opt.wrong{background:#3a1b1a}
+.rev .why{font-size:15px;color:var(--ink-soft);margin-top:8px;background:var(--tint);border-radius:10px;padding:9px 12px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.filters button{border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:14px}
+.filters button.on{background:var(--bar);color:var(--on-bar);border-color:var(--bar)}
+h2.h{font-family:var(--f-display);font-size:20px;margin:26px 0 10px}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <span class="bar-side"><a class="bar-link" href="index.html">← Notes</a></span>
+    <a class="brand" href="exams.html" aria-label="SVG Horizon Exams" style="text-decoration:none">
+      <svg class="brand-mark" viewBox="0 0 44 30" aria-hidden="true">
+        <path class="sun" d="M9 23a13 13 0 0 1 26 0z"/>
+        <path class="rays" d="M22 3.5v3.5M9.5 8.6l2.5 2.5M34.5 8.6L32 11.1M4 15.5h3.4M40 15.5h-3.4"/>
+        <path class="line" d="M2 26.5h40"/>
+      </svg>
+      <span class="brand-name">SVG Horizon</span>
+    </a>
+    <span class="bar-side end"><button class="theme-btn" id="themeBtn">Dark</button></span>
+  </div>
+</header>
+
+<div class="wrap">
+  <main id="app"><p class="loading">Loading exams…</p></main>
+  <footer>SVG Horizon · The Sivagangai District Initiative · Free for every student</footer>
+</div>
+
+<script>
+/* ============================================================
+   SVG Horizon — exam pages
+   Addresses:  exams.html              the exam calendar
+               exams.html#/exam/<id>   details → waiting room → exam → result
+               exams.html#/result/<id> see a result again with the EMIS number
+   ============================================================ */
+const CFG = {
+  URL: "https://jzuwqxannxfplexdebhm.supabase.co",
+  KEY: "sb_publishable_U1yGU-rGoCfF-GMNVc5AOw_P7RXoKTk"     // public key – safe to publish
+};
+const app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const L = "ABCD";
+const LANGNAME = { en: "English", ta: "தமிழ்", both: "English + தமிழ்" };
+function ls(k, v){ try{ if (v === undefined) return JSON.parse(localStorage.getItem(k)); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
+
+/* ---------- server clock: every countdown uses Supabase's time, not the phone's ---------- */
+let OFFSET = 0;
+const now = () => Date.now() + OFFSET;
+const setClock = s => { if (s) OFFSET = new Date(s).getTime() - Date.now(); };
+const T = d => new Date(d).getTime();
+const IST_T = new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",hour:"numeric",minute:"2-digit",hour12:true});
+const IST_D = new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",weekday:"short",day:"numeric",month:"short"});
+const tm = d => IST_T.format(new Date(d)).replace(" ", " ").toUpperCase();
+function left(ms){
+  ms = Math.max(0, ms); const s = Math.floor(ms/1000), d = Math.floor(s/86400), h = Math.floor(s%86400/3600), m = Math.floor(s%3600/60), x = s%60;
+  const p = n => String(n).padStart(2,"0");
+  if (d) return `${d}d ${h}h ${p(m)}m`;
+  return h ? `${h}:${p(m)}:${p(x)}` : `${p(m)}:${p(x)}`;
+}
+
+/* ---------- talking to Supabase (small, no library) ---------- */
+async function rpc(fn, args = {}, tries = 4){
+  let wait = 800;
+  for (let i = 1; ; i++){
+    try{
+      const r = await fetch(`${CFG.URL}/rest/v1/rpc/${fn}`, { method: "POST",
+        headers: { apikey: CFG.KEY, "Content-Type": "application/json" }, body: JSON.stringify(args) });
+      if (r.ok) return await r.json();
+      if (r.status < 500 && r.status !== 429) throw Object.assign(new Error("HTTP " + r.status), { fatal: true });
+      throw new Error("HTTP " + r.status);
+    }catch(err){
+      if (err.fatal || i >= tries) throw err;
+      await sleep(wait + Math.random() * wait); wait *= 2;
+    }
+  }
+}
+
+/* ---------- opening a sealed file (same method as the admin page) ---------- */
+const MAGIC = [83,86,72,49];
+const unb64u = s => Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")), c => c.charCodeAt(0));
+async function unseal(buf, keyStr){
+  const b = new Uint8Array(buf);
+  if (!MAGIC.every((m,i) => b[i] === m)) throw new Error("bad file");
+  const key = await crypto.subtle.importKey("raw", unb64u(keyStr), "AES-GCM", false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b.slice(4,16) }, key, b.slice(16));
+  const txt = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  return JSON.parse(txt);
+}
+async function getSealed(path, key){
+  for (let i = 0; i < 4; i++){
+    try{ const r = await fetch(path, { cache: "no-store" }); if (r.ok) return await unseal(await r.arrayBuffer(), key); }catch(e){}
+    await sleep(1000 * (i + 1));
+  }
+  throw new Error("Could not download the question paper. Check your internet and try again.");
+}
+
+/* ---------- friendly messages (English + Tamil) ---------- */
+const ERR = {
+  INVALID_EMIS:      ["Please enter a correct EMIS number (digits only).", "சரியான EMIS எண்ணை உள்ளிடவும் (எண்கள் மட்டும்)."],
+  MISSING_DETAILS:   ["Please fill your name, school, class and EMIS number.", "உங்கள் பெயர், பள்ளி, வகுப்பு, EMIS எண் அனைத்தையும் நிரப்பவும்."],
+  EXAM_NOT_FOUND:    ["This exam is not available.", "இந்தத் தேர்வு கிடைக்கவில்லை."],
+  ALREADY_SUBMITTED: ["You have already submitted this exam. Only one attempt is allowed.", "நீங்கள் ஏற்கனவே இந்தத் தேர்வை சமர்ப்பித்துவிட்டீர்கள். ஒரு முறை மட்டுமே அனுமதி."],
+  TIME_OVER:         ["The time for this exam is over.", "இந்தத் தேர்வுக்கான நேரம் முடிந்துவிட்டது."],
+  NOT_OPEN_YET:      ["Joining has not opened yet.", "தேர்வில் சேர இன்னும் நேரம் ஆகவில்லை."],
+  JOIN_CLOSED:       ["Joining is closed. Late entry is allowed only up to 10 minutes after the start.", "சேரும் நேரம் முடிந்தது. தொடக்கத்திலிருந்து 10 நிமிடங்கள் வரை மட்டுமே தாமதமாக சேரலாம்."],
+  EXAM_NOT_STARTED:  ["The exam has not started yet.", "தேர்வு இன்னும் தொடங்கவில்லை."],
+  SUBMISSION_CLOSED: ["Submission time is over.", "சமர்ப்பிக்கும் நேரம் முடிந்துவிட்டது."],
+  NOT_STARTED:       ["We could not find your registration for this exam.", "இந்தத் தேர்வுக்கான உங்கள் பதிவு கிடைக்கவில்லை."],
+  NO_RESULT:         ["No submitted exam found for this EMIS number.", "இந்த EMIS எண்ணுக்கு சமர்ப்பிக்கப்பட்ட தேர்வு எதுவும் இல்லை."],
+  INVALID_ANSWERS:   ["Something went wrong with your answers. Please try again.", "உங்கள் விடைகளில் சிக்கல். மீண்டும் முயற்சிக்கவும்."]
+};
+const errBox = code => { const m = ERR[code] || [code, ""]; return `<div class="note-box err">${esc(m[0])}<br><span class="ta">${esc(m[1])}</span></div>`; };
+
+/* ---------- routing ---------- */
+let EXAMS = null, TIMER = null;
+function stopTimer(){ if (TIMER){ clearInterval(TIMER); TIMER = null; } }
+async function loadExams(force){
+  if (EXAMS && !force) return EXAMS;
+  EXAMS = await rpc("list_exams");
+  if (EXAMS.length) setClock(EXAMS[0].server_now);
+  return EXAMS;
+}
+async function route(){
+  stopTimer(); document.body.classList.remove("exam-mode"); window.onbeforeunload = null;
+  const [, view, id] = location.hash.replace(/^#/, "").split("/").map(decodeURIComponent);
+  try{
+    await loadExams(!view);
+    const ex = id && EXAMS.find(e => e.id === id);
+    if (view === "exam" && ex) return showDetails(ex);
+    if (view === "result" && ex) return showResultLookup(ex);
+    if (view) { location.hash = ""; return; }
+    showCalendar();
+  }catch(err){
+    app.innerHTML = `<div class="empty" style="margin-top:36px"><strong>Could not load exams</strong>Check your internet connection and try again.<br><span class="ta">இணைய இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.</span></div>
+      <button class="back" onclick="route()">Try again</button>`;
+  }
+}
+window.addEventListener("hashchange", route);
+
+/* ============================================================
+   1. CALENDAR
+   ============================================================ */
+function stateOf(e){
+  const n = now();
+  if (n < T(e.join_opens)) return "soon";
+  if (n <= T(e.join_closes)) return "open";
+  if (n < T(e.ends_at)) return "running";
+  return "done";
+}
+function actionHTML(e){
+  const st = stateOf(e), n = now(), sess = ls("svh_sess_" + e.id), res = sess && ls(`svh_res_${e.id}_${sess.emis}`);
+  if (res) return `<span class="when">✓ Submitted</span><a class="btn ghost" href="#/result/${encodeURIComponent(e.id)}">My result</a>`;
+  if (st === "soon") return `<span class="when">Opens at <b>${tm(e.join_opens)}</b> · in <b>${left(T(e.join_opens) - n)}</b></span><button class="btn" disabled>🔒 Start exam</button>`;
+  if (st === "open" && sess) return `<span class="when">Registered · ${now() < T(e.start_at) ? "starts in <b>" + left(T(e.start_at) - n) + "</b>" : "in progress"}</span><a class="btn amber" href="#/exam/${encodeURIComponent(e.id)}">Continue →</a>`;
+  if (st === "open") return `<span class="when">Open now · closes in <b>${left(T(e.join_closes) - n)}</b></span><a class="btn amber" href="#/exam/${encodeURIComponent(e.id)}">Start exam →</a>`;
+  if (st === "running") return sess
+    ? `<span class="when">In progress · ends ${tm(e.ends_at)}</span><a class="btn amber" href="#/exam/${encodeURIComponent(e.id)}">Continue exam →</a>`
+    : `<span class="when">Joining closed · exam ends ${tm(e.ends_at)}</span><button class="btn" disabled>Closed</button>`;
+  return `<span class="when">Finished</span><a class="btn ghost" href="#/result/${encodeURIComponent(e.id)}">View result</a>`;
+}
+function card(e){
+  const d = new Date(e.start_at), st = stateOf(e);
+  const day = new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"numeric"}).format(d);
+  const mon = new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",month:"short"}).format(d);
+  return `<article class="ex-card ${st === "open" ? "live" : ""}">
+    <div class="date"><b>${day}</b><span>${mon}</span></div>
+    <div><h3 class="ex-title">${esc(e.title)}${st === "open" || st === "running" ? `<span class="tag live">LIVE</span>` : ""}</h3>
+      <p class="ex-meta">${IST_D.format(d)} · ${tm(e.start_at)} – ${tm(e.ends_at)} · ${e.total_questions} questions · ${LANGNAME[e.language]}</p>
+      ${e.topics ? `<p class="ex-topics">${esc(e.topics)}</p>` : ""}</div>
+    <div class="ex-act" data-id="${esc(e.id)}">${actionHTML(e)}</div></article>`;
+}
+function showCalendar(){
+  document.title = "Exams · SVG Horizon";
+  const n = now();
+  const up = EXAMS.filter(e => T(e.ends_at) > n).sort((a,b) => T(a.start_at) - T(b.start_at));
+  const past = EXAMS.filter(e => T(e.ends_at) <= n).sort((a,b) => T(b.start_at) - T(a.start_at));
+  app.innerHTML = `<div class="page-head"><p class="kicker">Exam calendar · <span class="ta">தேர்வு அட்டவணை</span></p>
+      <h1>Free practice exams</h1>
+      <p>The Start button opens 10 minutes before each exam. Questions appear exactly at the start time. You may join up to 10 minutes late. One attempt per student.</p></div>
+    <h2 class="h">Today &amp; upcoming</h2>
+    <div class="cal">${up.map(card).join("") || `<div class="empty"><strong>No upcoming exams</strong>Check back soon.</div>`}</div>
+    ${past.length ? `<h2 class="h">Recent exams</h2><div class="cal">${past.map(card).join("")}</div>` : ""}`;
+  let lastStates = EXAMS.map(stateOf).join();
+  TIMER = setInterval(() => {
+    const s = EXAMS.map(stateOf).join();
+    if (s !== lastStates){ lastStates = s; return showCalendar(); }       // a button just opened/closed: redraw
+    document.querySelectorAll(".ex-act").forEach(el => { const e = EXAMS.find(x => x.id === el.dataset.id); if (e) el.innerHTML = actionHTML(e); });
+  }, 1000);
+}
+
+/* ============================================================
+   2. DETAILS FORM  →  3. WAITING ROOM
+   ============================================================ */
+function showDetails(e){
+  document.title = e.title + " · SVG Horizon";
+  const me = ls("svh_student") || {}, sess = ls("svh_sess_" + e.id);
+  if (sess && now() >= T(e.join_opens) && now() < T(e.ends_at)) return join(e, sess, true);   // came back (waiting or mid-exam): continue straight away
+  const cls = ["6","7","8","9","10","11","12"];
+  app.innerHTML = `<div class="page-head"><p class="kicker">${IST_D.format(new Date(e.start_at))} · ${tm(e.start_at)}</p><h1>${esc(e.title)}</h1>
+      <p>${e.total_questions} questions · ${e.duration_min} minutes · ${LANGNAME[e.language]}</p></div>
+    <div class="card"><h2 class="h" style="margin-top:0">Your details · <span class="ta">உங்கள் விவரங்கள்</span></h2>
+      <form id="f" autocomplete="on">
+        <div class="field"><label>Name <small>· பெயர்</small></label><input name="name" required maxlength="80" value="${esc(me.name||"")}"></div>
+        <div class="field"><label>School <small>· பள்ளி</small></label><input name="school" required maxlength="120" value="${esc(me.school||"")}" placeholder="e.g. GHSS Sivagangai"></div>
+        <div class="field"><label>Class <small>· வகுப்பு</small></label><select name="cls" required><option value="">Choose</option>${cls.map(c => `<option ${me.cls===c?"selected":""}>${c}</option>`).join("")}</select></div>
+        <div class="field"><label>EMIS number <small>· EMIS எண்</small></label><input name="emis" required inputmode="numeric" pattern="[0-9]{6,20}" maxlength="20" value="${esc(me.emis||"")}" placeholder="Digits only"></div>
+        <div id="fmsg"></div>
+        <button class="btn amber wide" id="go">Continue →</button>
+      </form></div>
+    <div class="card"><h2 class="h" style="margin-top:0">Rules · <span class="ta">விதிமுறைகள்</span></h2><ol class="rules">
+      <li>Questions appear at <b>${tm(e.start_at)}</b>. The exam ends for everyone at <b>${tm(e.ends_at)}</b>.<br><span class="ta muted">கேள்விகள் ${tm(e.start_at)}-க்கு தோன்றும். அனைவருக்கும் ${tm(e.ends_at)}-க்கு முடியும்.</span></li>
+      <li>Only <b>one attempt</b> per EMIS number.<br><span class="ta muted">ஒரு EMIS எண்ணுக்கு ஒரு முறை மட்டுமே.</span></li>
+      <li>Marks: +${e.mark_correct ?? ""} for a correct answer${e.mark_wrong ? `, ${e.mark_wrong} for a wrong answer` : ""}${e.mark_wrong ? ". If unsure, you may skip." : "."}</li>
+      <li>Your answers are saved on this phone. If the internet or phone stops, open this page again with the same EMIS number to continue.<br><span class="ta muted">இணையம் துண்டிக்கப்பட்டால், அதே EMIS எண்ணுடன் மீண்டும் திறந்து தொடரலாம்.</span></li>
+      <li>At the end time your answers are submitted automatically.</li></ol></div>
+    <a class="back" href="#" style="display:inline-block;text-decoration:none">← All exams</a>`;
+  const f = document.getElementById("f");
+  f.onsubmit = async ev => {
+    ev.preventDefault();
+    const d = { name: f.name.value.trim(), school: f.school.value.trim(), cls: f.cls.value, emis: f.emis.value.replace(/\s/g,"") };
+    ls("svh_student", d);
+    document.getElementById("go").disabled = true;
+    await join(e, d, false);
+    const b = document.getElementById("go"); if (b) b.disabled = false;
+  };
+}
+
+async function join(e, d, resuming){
+  const fmsg = document.getElementById("fmsg");
+  let r;
+  try{ r = await rpc("start_exam", { p_exam_id: e.id, p_emis: d.emis, p_name: d.name, p_school: d.school, p_class: d.cls }); }
+  catch(err){ if (fmsg) fmsg.innerHTML = `<div class="note-box err">Network problem. Please try again.<br><span class="ta">இணையச் சிக்கல். மீண்டும் முயற்சிக்கவும்.</span></div>`; return; }
+  setClock(r.server_now);
+  if (!r.ok){
+    if (resuming){ ls("svh_sess_" + e.id, null); return showDetails(e); }
+    fmsg.innerHTML = errBox(r.error) + (r.error === "ALREADY_SUBMITTED" ? `<a class="btn ghost wide" href="#/result/${encodeURIComponent(e.id)}">See my result</a>` : "");
+    return;
+  }
+  ls("svh_sess_" + e.id, d);
+  if (r.waiting) return waitingRoom(e, d, r);
+  startExam(e, d, r);
+}
+
+function waitingRoom(e, d, r){
+  document.body.classList.remove("exam-mode");
+  app.innerHTML = `<div class="card center" style="margin-top:22px">
+      <p class="note-box ok" style="margin-top:0">✓ Registered: <b>${esc(d.name)}</b> · ${esc(d.school)} · Class ${esc(d.cls)} · EMIS ${esc(d.emis)}</p>
+      <p class="muted" style="margin:14px 0 0">${esc(e.title)} starts in</p>
+      <div class="big-count" id="cd">--:--</div>
+      <p class="muted">Questions will appear automatically at <b>${tm(r.starts_at)}</b>. Keep this page open.<br><span class="ta">கேள்விகள் ${tm(r.starts_at)}-க்கு தானாகத் தோன்றும். இந்தப் பக்கத்தை மூடாதீர்கள்.</span></p>
+      ${e.language === "both" ? `<p class="muted" style="margin-top:18px">Choose your language · <span class="ta">மொழியைத் தேர்ந்தெடுக்கவும்</span></p>${langSeg(true)}` : ""}
+    </div>`;
+  bindLang();
+  const start = T(r.starts_at), jitter = Math.random() * 12000;     // spread 10,000 phones over ~12 seconds
+  let asked = false;
+  TIMER = setInterval(async () => {
+    const ms = start - now();
+    document.getElementById("cd").textContent = ms > 0 ? left(ms) : "Starting…";
+    if (ms <= -jitter && !asked){
+      asked = true; stopTimer();
+      let g;
+      for (let i = 0; i < 6; i++){
+        try{ g = await rpc("start_exam", { p_exam_id: e.id, p_emis: d.emis, p_name: d.name, p_school: d.school, p_class: d.cls }); }catch(err){}
+        if (g && g.ok && !g.waiting) break;
+        await sleep(2000 + Math.random() * 3000);
+      }
+      if (g && g.ok && !g.waiting){ setClock(g.server_now); startExam(e, d, g); }
+      else { app.innerHTML = `<div class="card">${errBox(g && g.error || "Network problem")}<button class="btn wide" onclick="route()">Try again</button></div>`; }
+    }
+  }, 250);
+}
+
+/* ============================================================
+   4. THE EXAM
+   ============================================================ */
+let X = null;   // { e, d, paper, ans:[], mark:Set, cur, ends, lang, submitting }
+function langSeg(light){
+  const cur = ls("svh_lang") || "both";
+  return `<div class="seg" ${light ? `style="border-color:var(--rule)"` : ""}>${[["en","English"],["ta","தமிழ்"],["both","Both"]].map(([k,v]) =>
+    `<button data-lang="${k}" class="${cur===k?"on":""}" ${light?`style="color:var(--ink)"`:""}>${v}</button>`).join("")}</div>`;
+}
+function bindLang(){
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { ls("svh_lang", b.dataset.lang); if (X) drawQ(); else document.querySelectorAll(".seg button").forEach(x => x.classList.toggle("on", x === b)); });
+}
+const saveKey = () => `svh_ans_${X.e.id}_${X.d.emis}`;
+function save(){ ls(saveKey(), { a: X.ans.map(x => x || "-").join(""), m: [...X.mark], c: X.cur }); }
+
+async function startExam(e, d, r){
+  app.innerHTML = `<p class="loading">Opening the question paper…</p>`;
+  let paper;
+  try{ paper = await getSealed(r.paper_file, r.paper_key); }
+  catch(err){ app.innerHTML = `<div class="card"><div class="note-box err">${esc(err.message)}</div><button class="btn wide" onclick="route()">Try again</button></div>`; return; }
+  X = { e, d, paper, ans: Array(paper.n).fill(null), mark: new Set(), cur: 0, ends: T(r.ends_at), submitting: false };
+  const saved = ls(saveKey());
+  if (saved && saved.a && saved.a.length === paper.n){ X.ans = [...saved.a].map(c => c === "-" ? null : c); X.mark = new Set(saved.m || []); X.cur = saved.c || 0; }
+  document.body.classList.add("exam-mode");
+  window.onbeforeunload = ev => { if (X && !X.submitting){ ev.preventDefault(); ev.returnValue = ""; } };
+  drawQ();
+  TIMER = setInterval(tick, 500);
+}
+function tick(){
+  const ms = X.ends - now(), el = document.getElementById("timer");
+  if (el){ el.textContent = left(ms); el.classList.toggle("low", ms < 5*60000); }
+  if (ms <= 0 && !X.submitting){ stopTimer(); submit(true); }
+}
+function effLang(){ const l = X.e.language; return l === "both" ? (ls("svh_lang") || "both") : l; }
+function drawQ(){
+  const q = X.paper.q[X.cur], lg = effLang(), n = X.paper.n, done = X.ans.filter(Boolean).length;
+  const en = lg !== "ta" && q.en, ta = lg !== "en" && q.ta;
+  app.innerHTML = `<div class="xbar"><span class="tt">${esc(X.e.title)}</span>
+      ${X.e.language === "both" ? langSeg(false) : ""}
+      <button class="pal-btn" id="pal">☰ ${done}/${n}</button>
+      <span class="timer" id="timer">${left(X.ends - now())}</span></div>
+    <div class="card">
+      <div class="qhead"><span>Question <b>${q.n}</b> of ${n}${q.s ? " · " + esc(q.s) : ""}</span>${X.mark.has(X.cur) ? `<span class="lvl p">★ Marked</span>` : ""}</div>
+      ${en ? `<p class="qtext">${esc(en.q)}</p>` : ""}${en && ta ? `<div class="qsep"></div>` : ""}${ta ? `<p class="qtext ta" lang="ta">${esc(ta.q)}</p>` : ""}
+      <div class="opts">${[0,1,2,3].map(i => `<button class="opt ${X.ans[X.cur] === L[i] ? "sel" : ""}" data-i="${i}"><span class="l">${L[i]}</span>
+        <span class="o">${en ? `<span>${esc(en.o[i])}</span>` : ""}${ta ? `<span class="${en ? "ta" : ""}" lang="ta">${esc(ta.o[i])}</span>` : ""}</span></button>`).join("")}</div>
+      <div class="qnav">
+        <button class="btn ghost" id="prev" ${X.cur === 0 ? "disabled" : ""}>← Previous</button>
+        ${X.cur < n - 1 ? `<button class="btn" id="next">Next →</button>` : `<button class="btn amber" id="rev">Review &amp; submit</button>`}
+        <button class="btn ghost mark ${X.mark.has(X.cur) ? "on" : ""}" id="mark">★ ${X.mark.has(X.cur) ? "Unmark" : "Mark for review"}</button>
+        <button class="btn ghost" id="clr" ${X.ans[X.cur] ? "" : "disabled"}>Clear answer</button>
+        <button class="btn ghost full" id="sub">Submit exam</button>
+      </div></div>`;
+  bindLang();
+  document.querySelectorAll(".opt").forEach(b => b.onclick = () => { X.ans[X.cur] = L[+b.dataset.i]; save(); drawQ(); });
+  const go = i => { X.cur = i; save(); drawQ(); window.scrollTo(0,0); };
+  document.getElementById("prev").onclick = () => go(X.cur - 1);
+  const nx = document.getElementById("next"); if (nx) nx.onclick = () => go(X.cur + 1);
+  const rv = document.getElementById("rev"); if (rv) rv.onclick = () => palette(true);
+  document.getElementById("mark").onclick = () => { X.mark.has(X.cur) ? X.mark.delete(X.cur) : X.mark.add(X.cur); save(); drawQ(); };
+  document.getElementById("clr").onclick = () => { X.ans[X.cur] = null; save(); drawQ(); };
+  document.getElementById("pal").onclick = () => palette(false);
+  document.getElementById("sub").onclick = () => palette(true);
+}
+function palette(confirmSubmit){
+  const a = X.ans.filter(Boolean).length, m = X.mark.size, n = X.paper.n;
+  const ov = document.createElement("div"); ov.className = "overlay";
+  ov.innerHTML = `<div class="sheet">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h2 class="h" style="margin:0">${confirmSubmit ? "Submit the exam?" : "All questions"}</h2><button class="btn ghost" id="x" style="min-height:36px;padding:6px 14px">Close</button></div>
+    <div class="counts"><div><b>${a}</b><span>Answered</span></div><div><b>${n - a}</b><span>Not answered</span></div><div><b>${m}</b><span>Marked</span></div></div>
+    <div class="legend"><span><i style="background:var(--ready);border-color:var(--ready)"></i>Answered</span><span><i style="background:var(--amber);border-color:var(--amber)"></i>Marked</span><span><i></i>Not answered</span></div>
+    <div class="grid-q">${X.paper.q.map((q,i) => `<button data-i="${i}" class="${X.mark.has(i) ? "mrk" : X.ans[i] ? "ans" : ""} ${i === X.cur ? "cur" : ""}">${i+1}</button>`).join("")}</div>
+    ${confirmSubmit ? `<div class="note-box warn">After submitting you cannot change your answers.<br><span class="ta">சமர்ப்பித்த பின் விடைகளை மாற்ற முடியாது.</span></div>
+      <button class="btn amber wide" id="yes">Yes, submit my answers</button>` : ""}</div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  ov.onclick = ev => { if (ev.target === ov) close(); };
+  ov.querySelector("#x").onclick = close;
+  ov.querySelectorAll(".grid-q button").forEach(b => b.onclick = () => { close(); X.cur = +b.dataset.i; save(); drawQ(); window.scrollTo(0,0); });
+  const y = ov.querySelector("#yes"); if (y) y.onclick = () => { close(); submit(false); };
+}
+
+async function submit(auto){
+  if (X.submitting) return; X.submitting = true; stopTimer(); save();
+  const answers = X.ans.map(x => x || "-").join("");
+  document.querySelectorAll(".overlay").forEach(o => o.remove());
+  app.innerHTML = `<div class="card center" style="margin-top:22px"><div class="big-count" style="font-size:44px">⏳</div>
+    <p><b>${auto ? "Time is over." : ""} Submitting your answers…</b><br><span class="ta muted">உங்கள் விடைகள் சமர்ப்பிக்கப்படுகின்றன…</span></p>
+    <p class="muted" id="smsg">Please keep this page open.</p></div>`;
+  if (auto) await sleep(Math.random() * 45000);          // spread everyone's auto-submit over 45 seconds
+  const deadline = X.ends + 4.5 * 60000; let r, tries = 0;
+  while (now() < deadline || tries < 2){
+    tries++;
+    try{ r = await rpc("submit_exam", { p_exam_id: X.e.id, p_emis: X.d.emis, p_answers: answers }, 2); }catch(err){ r = null; }
+    if (r) break;
+    const s = document.getElementById("smsg"); if (s) s.textContent = `Network is slow… retrying (${tries}). Your answers are safe on this phone.`;
+    await sleep(3000 + Math.random() * 5000);
+  }
+  window.onbeforeunload = null; document.body.classList.remove("exam-mode");
+  if (!r || !r.ok){
+    app.innerHTML = `<div class="card">${errBox(r ? r.error : "Could not reach the server.")}
+      <p class="muted">Your answers are saved on this phone. Tell your teacher, and try again below.</p>
+      <button class="btn wide" id="again">Try submitting again</button></div>`;
+    document.getElementById("again").onclick = () => { X.submitting = false; submit(false); };
+    return;
+  }
+  ls(`svh_res_${X.e.id}_${X.d.emis}`, { at: Date.now() });
+  showResult(X.e, { ...r, name: X.d.name, school: X.d.school, your_answers: answers });
+}
+
+/* ============================================================
+   5. RESULT
+   ============================================================ */
+function showResultLookup(e){
+  document.title = "Result · " + e.title;
+  const me = ls("svh_sess_" + e.id) || ls("svh_student") || {};
+  app.innerHTML = `<div class="page-head"><p class="kicker">Result · <span class="ta">முடிவு</span></p><h1>${esc(e.title)}</h1></div>
+    <div class="card"><form id="rf"><div class="field"><label>EMIS number <small>· EMIS எண்</small></label>
+      <input name="emis" required inputmode="numeric" pattern="[0-9]{6,20}" value="${esc(me.emis || "")}"></div>
+      <div id="rmsg"></div><button class="btn amber wide">See my result</button></form></div>
+    <a class="back" href="#" style="display:inline-block;text-decoration:none">← All exams</a>`;
+  const f = document.getElementById("rf");
+  f.onsubmit = async ev => {
+    ev.preventDefault();
+    try{ const r = await rpc("get_result", { p_exam_id: e.id, p_emis: f.emis.value.trim() });
+      if (!r.ok) return document.getElementById("rmsg").innerHTML = errBox(r.error);
+      showResult(e, r);
+    }catch(err){ document.getElementById("rmsg").innerHTML = errBox("Network problem. Please try again."); }
+  };
+}
+
+let SYL = null;
+async function studyLinks(topics){
+  try{ if (!SYL) SYL = (await (await fetch("data/syllabus.json")).json()).exams; }catch(e){ return {}; }
+  const words = s => String(s).toLowerCase().replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(w => w.length > 2 && !["and","the","unit","of","in","for"].includes(w));
+  const idx = [];
+  for (const [ei, ex] of Object.entries(SYL)) for (const [si, sb] of Object.entries(ex.subjects)) for (const [ci, ch] of Object.entries(sb.chapters)) {
+    idx.push({ name: ch.name, subj: sb.name, href: `index.html#/${ei}/${si}/${ci}`, w: words(ch.name) });
+    for (const [ti, tp] of Object.entries(ch.topics || {})) idx.push({ name: tp.name, subj: sb.name, href: `index.html#/${ei}/${si}/${ci}/${ti}`, w: words(tp.name), topic: 1 });
+  }
+  const out = {};
+  topics.forEach(t => {
+    const q = words(t.topic); if (!q.length) return;
+    let best = null, bs = 0;
+    idx.forEach(x => { if (t.subject && x.subj.toLowerCase() !== String(t.subject).toLowerCase()) return;
+      const same = (a, b) => a === b || (a.length >= 6 && b.length >= 6 && a.slice(0,6) === b.slice(0,6)) || a.replace(/s$/,"") === b.replace(/s$/,"");
+      const hit = q.filter(w => x.w.some(v => same(w, v))).length / q.length + (x.topic ? .01 : 0);
+      if (hit > bs){ bs = hit; best = x; } });
+    if (best && bs >= .5) out[t.subject + "|" + t.topic] = best;
+  });
+  return out;
+}
+
+async function showResult(e, r){
+  stopTimer(); document.body.classList.remove("exam-mode");
+  document.title = "Result · " + e.title;
+  const pct = r.max_score ? Math.round(100 * r.score / r.max_score) : 0;
+  const lvl = p => p >= 80 ? `<span class="lvl s">Strength</span>` : p >= 50 ? `<span class="lvl p">Needs practice</span>` : `<span class="lvl w">Weak area</span>`;
+  const topics = [...(r.topics || [])].sort((a,b) => a.pct - b.pct);
+  const weak = topics.filter(t => t.pct < 80);
+  app.innerHTML = `<div class="page-head"><p class="kicker">Your result · <span class="ta">உங்கள் முடிவு</span></p><h1>${esc(e.title)}</h1>
+      <p>${esc(r.name || "")}${r.school ? " · " + esc(r.school) : ""}</p></div>
+    <div class="card score"><div class="num">${r.score} <small>/ ${r.max_score}</small></div><div class="pct">${pct}%</div>
+      <div class="counts"><div><b style="color:var(--ready)">${r.correct}</b><span>Correct · சரி</span></div><div><b style="color:#b4463c">${r.wrong}</b><span>Wrong · தவறு</span></div><div><b>${r.skipped}</b><span>Skipped · விடுபட்டவை</span></div></div></div>
+    <h2 class="h">Topic-wise · <span class="ta">பாடப்பகுதி வாரியாக</span></h2>
+    <div class="card" style="overflow-x:auto"><table class="tbl"><thead><tr><th>Topic</th><th>Score</th><th style="width:30%"></th></tr></thead><tbody>
+      ${topics.map(t => `<tr><td>${esc(t.topic)}<div style="margin-top:4px">${lvl(t.pct)} <span class="muted" style="font-size:12.5px">${esc(t.subject || "")}</span></div></td><td>${t.correct}/${t.total}</td>
+        <td><div class="mini"><span style="width:${t.pct}%"></span></div><div class="muted" style="font-size:12.5px;margin-top:3px">${t.pct}%</div></td></tr>`).join("")}</tbody></table></div>
+    <h2 class="h">By difficulty</h2>
+    <div class="card"><table class="tbl"><tbody>${(r.difficulty || []).map(d => `<tr><td>${esc(d.difficulty)}</td><td>${d.correct}/${d.total}</td><td style="width:45%"><div class="mini"><span style="width:${d.pct}%"></span></div></td><td>${d.pct}%</td></tr>`).join("")}</tbody></table></div>
+    ${weak.length ? `<h2 class="h">Study this next · <span class="ta">அடுத்து படிக்க</span></h2><div class="card study" id="study">${weak.map(t => `<a data-k="${esc(t.subject + "|" + t.topic)}"><span>${esc(t.topic)}</span><span class="muted">${t.pct}%</span></a>`).join("")}</div>` : ""}
+    <h2 class="h">Answers &amp; explanations · <span class="ta">விடைகள் &amp; விளக்கம்</span></h2>
+    <div id="review"></div>
+    <a class="back" href="#" style="display:inline-block;text-decoration:none">← All exams</a>`;
+  // links to notes
+  if (weak.length) studyLinks(weak).then(map => document.querySelectorAll("#study a").forEach(a => {
+    const m = map[a.dataset.k];
+    if (m){ a.href = m.href; a.querySelector(".muted").innerHTML = `${a.querySelector(".muted").textContent} · Read notes →`; }
+    else a.style.cursor = "default";
+  }));
+  reviewBox(e, r);
+}
+
+async function reviewBox(e, r){
+  const box = document.getElementById("review"); if (!box) return;
+  if (!r.solutions_open){
+    const open = T(r.results_at);
+    box.innerHTML = `<div class="card center"><p style="margin:0">Correct answers unlock at <b>${tm(open)}</b>, after the exam ends for everyone.</p>
+      <p class="ta muted" style="margin:4px 0 12px">சரியான விடைகள் ${tm(open)}-க்குப் பிறகு தெரியும்.</p>
+      <p class="muted" id="rc"></p><button class="btn ghost" id="chk">Check now</button></div>`;
+    const tickR = () => { const el = document.getElementById("rc"); if (el) el.textContent = open > now() ? "in " + left(open - now()) : "Ready — tap Check now"; };
+    tickR(); TIMER = setInterval(tickR, 1000);
+    document.getElementById("chk").onclick = async () => {
+      const emis = (ls("svh_sess_" + e.id) || {}).emis || prompt("EMIS number");
+      try{ const g = await rpc("get_result", { p_exam_id: e.id, p_emis: emis }); if (g.ok && g.solutions_open){ stopTimer(); reviewBox(e, g); } else if (g.ok) document.getElementById("rc").textContent = "Not yet — please wait."; }catch(err){}
+    };
+    return;
+  }
+  box.innerHTML = `<p class="loading">Loading answers…</p>`;
+  try{
+    const [paper, sol] = await Promise.all([getSealed(r.paper_file, r.paper_key), getSealed(r.solutions_file, r.solutions_key)]);
+    const mine = r.your_answers || "", key = sol.a;
+    let filter = "all";
+    const draw = () => {
+      const lg = e.language === "both" ? (ls("svh_lang") || "both") : e.language;
+      const list = paper.q.map((q,i) => ({ q, i, my: mine[i], ok: mine[i] === key[i] }))
+        .filter(x => filter === "all" || (filter === "wrong" && x.my && x.my !== "-" && !x.ok) || (filter === "skip" && (!x.my || x.my === "-")));
+      box.innerHTML = `<div class="filters">${[["all","All"],["wrong","Wrong"],["skip","Skipped"]].map(([k,v]) => `<button data-f="${k}" class="${filter===k?"on":""}">${v}</button>`).join("")}</div>
+        <div class="card">${list.map(({q,i,my}) => {
+          const en = lg !== "ta" && q.en, ta = lg !== "en" && q.ta, ex = sol.e[i] || [];
+          return `<div class="rev"><div class="qhead"><span>Q${q.n}</span><span>${my && my !== "-" ? (my === key[i] ? `<span class="lvl s">✓ Correct</span>` : `<span class="lvl w">✗ Wrong</span>`) : `<span class="lvl p">Skipped</span>`}</span></div>
+            ${en ? `<p class="qtext" style="font-size:16.5px">${esc(en.q)}</p>` : ""}${ta ? `<p class="qtext ta" style="font-size:16px" lang="ta">${esc(ta.q)}</p>` : ""}
+            <div class="opts" style="margin-top:8px">${[0,1,2,3].map(k => `<div class="opt ${key[i] === L[k] ? "right" : my === L[k] ? "wrong" : ""}"><span class="l">${L[k]}</span>
+              <span class="o">${en ? `<span>${esc(en.o[k])}</span>` : ""}${ta ? `<span class="${en ? "ta" : ""}" lang="ta">${esc(ta.o[k])}</span>` : ""}</span></div>`).join("")}</div>
+            ${(ex[0] && lg !== "ta") || (ex[1] && lg !== "en") ? `<div class="why">💡 ${lg !== "ta" && ex[0] ? esc(ex[0]) : ""}${lg === "both" && ex[0] && ex[1] ? "<br>" : ""}${lg !== "en" && ex[1] ? `<span class="ta">${esc(ex[1])}</span>` : ""}</div>` : ""}</div>`; }).join("") || `<p class="muted">Nothing here.</p>`}</div>`;
+      box.querySelectorAll(".filters button").forEach(b => b.onclick = () => { filter = b.dataset.f; draw(); });
+    };
+    draw();
+  }catch(err){ box.innerHTML = `<div class="note-box err">${esc(err.message)}</div>`; }
+}
+
+/* ---------- theme button (same behaviour as the notes pages) ---------- */
+const tb = document.getElementById("themeBtn");
+const isDark = () => document.documentElement.getAttribute("data-theme") === "dark"
+  || (!document.documentElement.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+tb.textContent = isDark() ? "Light" : "Dark";
+tb.onclick = () => { const dark = isDark(); document.documentElement.setAttribute("data-theme", dark ? "light" : "dark"); tb.textContent = dark ? "Dark" : "Light"; };
+
+route();
+</script>
+</body>
+</html>
