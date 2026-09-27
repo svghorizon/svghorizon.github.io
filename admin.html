@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>SVG Horizon · Exam Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#f6f5f1; --card:#ffffff; --ink:#1d1d1b; --muted:#6b6b66; --line:#e3e1da;
+    --brand:#0f5c4c; --brand-soft:#e3f0ec; --warn:#9a5b00; --warn-soft:#fff4dc;
+    --bad:#a4262c; --bad-soft:#fde7e8; --good:#1e6b34; --good-soft:#e5f4e8;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:"Familjen Grotesk","Noto Sans Tamil",system-ui,sans-serif;font-size:15px;line-height:1.5}
+  .ta{font-family:"Noto Sans Tamil","Nirmala UI",sans-serif}
+  header{background:var(--brand);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  header .logo{width:34px;height:34px;border-radius:8px;background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:700}
+  header h1{font-size:18px;margin:0;font-weight:600}
+  header .sp{flex:1}
+  header .who{font-size:13px;opacity:.85}
+  main{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+  nav.tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+  nav.tabs button{border:1px solid var(--line);background:var(--card);padding:8px 16px;border-radius:999px;cursor:pointer;font:inherit}
+  nav.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px}
+  .card h2{font-size:17px;margin:0 0 12px}
+  .card h3{font-size:15px;margin:16px 0 8px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+  input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--brand);color:#fff;padding:9px 16px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+  .btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.bad{background:var(--bad)}
+  .btn.small{padding:5px 10px;font-size:13px;font-weight:500}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .msg{padding:10px 14px;border-radius:8px;margin:10px 0;font-size:14px}
+  .msg.ok{background:var(--good-soft);color:var(--good)}
+  .msg.warn{background:var(--warn-soft);color:var(--warn)}
+  .msg.err{background:var(--bad-soft);color:var(--bad)}
+  .msg.info{background:var(--brand-soft);color:var(--brand)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+  .tbl{overflow-x:auto}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600}
+  .p-draft{background:#eee;color:#555}.p-sched{background:var(--brand-soft);color:var(--brand)}
+  .p-live{background:#fff0c2;color:#7a5200}.p-done{background:#e8e8f4;color:#3b3b7a}
+  .stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:12px}
+  .stat b{display:block;font-size:22px}
+  .stat span{font-size:12px;color:var(--muted)}
+  .steps{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .steps div{flex:1;min-width:120px;padding:8px 12px;border-radius:8px;background:#eee;color:#777;font-size:13px}
+  .steps div.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+  .steps div.done{background:var(--good-soft);color:var(--good)}
+  .q{border-top:1px solid var(--line);padding:12px 0}
+  .q .opt{padding:4px 10px;border-radius:6px;margin:3px 0}
+  .q .opt.right{background:var(--good-soft);color:var(--good);font-weight:600}
+  .q .exp{font-size:13px;color:var(--muted);margin-top:6px}
+  .bar{height:8px;background:#eee;border-radius:4px;overflow:hidden;min-width:80px}
+  .bar i{display:block;height:100%;background:var(--brand)}
+  .hidden{display:none!important}
+  .muted{color:var(--muted);font-size:13px}
+  #login{max-width:380px;margin:60px auto}
+  code{background:#f0efe9;padding:1px 5px;border-radius:4px;font-size:13px}
+  @media (max-width:600px){header h1{font-size:16px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">S</div><h1>SVG Horizon · Exam Admin</h1><div class="sp"></div>
+  <span class="who" id="who"></span>
+  <button class="btn sec small hidden" id="btnLogout">Sign out</button>
+</header>
+
+<main>
+  <!-- ============ LOGIN ============ -->
+  <section id="login" class="card">
+    <h2>Admin sign in</h2>
+    <p class="muted">Only SVG Horizon admins can use this page.</p>
+    <label>Email</label><input id="loginEmail" type="email" autocomplete="username">
+    <div style="height:10px"></div>
+    <label>Password</label><input id="loginPass" type="password" autocomplete="current-password">
+    <div style="height:14px"></div>
+    <button class="btn" id="btnLogin">Sign in</button>
+    <div id="loginMsg"></div>
+  </section>
+
+  <!-- ============ APP ============ -->
+  <section id="app" class="hidden">
+    <nav class="tabs">
+      <button data-tab="exams" class="on">📅 Exams</button>
+      <button data-tab="editor">➕ New exam</button>
+      <button data-tab="results">📊 Results</button>
+      <button data-tab="settings">⚙️ Settings</button>
+    </nav>
+
+    <!-- ---------- EXAMS LIST ---------- -->
+    <div id="tab-exams">
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><h2 style="margin:0">All exams</h2>
+          <button class="btn sec small" id="btnReloadExams">↻ Refresh</button></div>
+        <div id="examsMsg"></div>
+        <div class="tbl"><table id="examsTbl"><thead><tr>
+          <th>Date &amp; time (IST)</th><th>Exam</th><th>Qs</th><th>Lang</th><th>Status</th><th>Actions</th>
+        </tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="card hidden" id="previewCard">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0" id="previewTitle">Preview</h2>
+          <div class="row">
+            <select id="previewLang" style="width:auto"><option value="both">Both</option><option value="en">English</option><option value="ta">தமிழ்</option></select>
+            <button class="btn sec small" id="btnClosePreview">Close</button>
+          </div>
+        </div>
+        <div id="previewBody"></div>
+      </div>
+    </div>
+
+    <!-- ---------- EDITOR ---------- -->
+    <div id="tab-editor" class="hidden">
+      <div class="steps"><div id="st1" class="on">1 · Exam details</div><div id="st2">2 · Upload Excel</div><div id="st3">3 · Seal &amp; save</div><div id="st4">4 · Publish</div></div>
+
+      <div class="card">
+        <h2 id="editorTitle">1 · Exam details</h2>
+        <div class="grid">
+          <div style="grid-column:1/-1"><label>Exam title (shown to students)</label><input id="fTitle" placeholder="NEET Biology Full Test – 1"></div>
+          <div><label>Subject</label><input id="fSubject" placeholder="Biology"></div>
+          <div><label>Language</label><select id="fLang">
+            <option value="both">English + Tamil</option><option value="en">English only</option><option value="ta">Tamil only</option></select></div>
+          <div style="grid-column:1/-1"><label>Topics (shown in the calendar)</label><input id="fTopics" placeholder="Units 1–5: Diversity, Cell, Plant Physiology…"></div>
+          <div><label>Exam date</label><input id="fDate" type="date"></div>
+          <div><label>Start time (IST)</label><input id="fTime" type="time" value="10:00"></div>
+          <div><label>Duration (minutes)</label><input id="fDur" type="number" min="1" value="180"></div>
+          <div><label>Marks for correct answer</label><input id="fMarkC" type="number" step="0.25" value="4"></div>
+          <div><label>Marks for wrong answer</label><input id="fMarkW" type="number" step="0.25" value="-1"></div>
+          <div><label>Join opens (min before start)</label><input id="fJoinB" type="number" min="0" value="10"></div>
+          <div><label>Late join allowed (min after start)</label><input id="fJoinA" type="number" min="0" value="10"></div>
+        </div>
+        <p class="muted" id="fIdNote"></p>
+      </div>
+
+      <div class="card">
+        <h2>2 · Upload the teacher's Excel</h2>
+        <p class="muted">Use the SVG Horizon Question Template. Details above are filled automatically from its Paper_Info sheet (you can change them).</p>
+        <input type="file" id="fFile" accept=".xlsx,.xls">
+        <div id="checkMsg"></div>
+        <div id="checkBody"></div>
+      </div>
+
+      <div class="card">
+        <h2>3 · Seal &amp; save</h2>
+        <p class="muted">Locks the question paper and solutions with two secret keys, and saves the answer key privately in Supabase. Students cannot see anything yet.</p>
+        <div class="row">
+          <button class="btn" id="btnSave" disabled>🔒 Seal &amp; save</button>
+          <button class="btn sec hidden" id="btnSaveDetails">Save details only</button>
+          <button class="btn sec" id="btnPreviewLocal" disabled>👁 Preview paper</button>
+          <button class="btn sec" id="btnResetEditor">Start over</button>
+        </div>
+        <div id="saveMsg"></div>
+      </div>
+
+      <div class="card">
+        <h2>4 · Publish to SVG Horizon</h2>
+        <p class="muted">Puts the two sealed files on the website, checks they are reachable, then shows the exam in the student calendar.</p>
+        <div id="pubAuto" class="hidden">
+          <button class="btn" id="btnPublishAuto">🚀 Upload to SVG Horizon &amp; publish</button>
+        </div>
+        <div id="pubManual" class="hidden">
+          <div class="msg info">No GitHub token in Settings, so upload the two files by hand:
+            <ol style="margin:6px 0 0 18px;padding:0">
+              <li>Download both files below.</li>
+              <li>On GitHub, open your SVG Horizon repository → <b>Add file → Upload files</b>.</li>
+              <li>Drag both files in, and in the file-name box type the folder path shown (e.g. <code id="manualPath"></code>). Commit.</li>
+              <li>Wait 1–2 minutes, then click <b>Check &amp; publish</b>.</li>
+            </ol></div>
+          <div class="row">
+            <button class="btn sec" id="btnDlPaper">⬇ Paper file</button>
+            <button class="btn sec" id="btnDlSol">⬇ Solutions file</button>
+            <button class="btn" id="btnCheckPublish">✔ Check &amp; publish</button>
+          </div>
+        </div>
+        <div id="pubMsg"></div>
+      </div>
+    </div>
+
+    <!-- ---------- RESULTS ---------- -->
+    <div id="tab-results" class="hidden">
+      <div class="card">
+        <div class="row">
+          <div style="flex:1;min-width:240px"><label>Exam</label><select id="rExam"></select></div>
+          <button class="btn" id="btnLoadResults" style="align-self:flex-end">Load results</button>
+        </div>
+        <div id="resMsg"></div>
+      </div>
+      <div id="resBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS ---------- -->
+    <div id="tab-settings" class="hidden">
+      <div class="card">
+        <h2>GitHub publishing (optional, recommended)</h2>
+        <p class="muted">With a GitHub token, "Publish" uploads the sealed files for you. The token is stored only in <b>this browser</b>. Create one at GitHub → Settings → Developer settings → Fine-grained tokens, with access to <b>only</b> the SVG Horizon repository and permission <b>Contents: Read and write</b>.</p>
+        <div class="grid">
+          <div><label>Repository owner</label><input id="sOwner"></div>
+          <div><label>Repository name</label><input id="sRepo"></div>
+          <div><label>Branch</label><input id="sBranch"></div>
+          <div><label>Website address</label><input id="sSite"></div>
+          <div style="grid-column:1/-1"><label>GitHub token</label><input id="sToken" type="password" placeholder="github_pat_…"></div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="row"><button class="btn" id="btnSaveSettings">Save</button>
+          <button class="btn sec" id="btnTestGh">Test connection</button>
+          <button class="btn sec" id="btnForgetToken">Remove token</button></div>
+        <div id="setMsg"></div>
+      </div>
+      <div class="card">
+        <h2>Monthly clean-up</h2>
+        <p class="muted">Keeps Supabase inside the free 500 MB. First download each exam's results (Results tab → Download CSV), then delete old attempts here. Exams, answer keys and students are kept.</p>
+        <div class="row"><div><label>Delete attempts of exams that ended before</label><input type="date" id="cBefore"></div>
+          <button class="btn bad" id="btnCleanup" style="align-self:flex-end">Delete old attempts</button></div>
+        <div id="cleanMsg"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* =====================================================================
+   SVG Horizon · Exam Admin
+   ===================================================================== */
+const CONFIG = {
+  SUPABASE_URL: "https://jzuwqxannxfplexdebhm.supabase.co",
+  SUPABASE_KEY: "sb_publishable_U1yGU-rGoCfF-GMNVc5AOw_P7RXoKTk",   // public key – safe to publish
+  EXAM_DIR: "exams",
+  DEFAULTS: { owner: "svghorizon", repo: "svghorizon.github.io", branch: "main", site: "https://svghorizon.github.io" }
+};
+const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const IST = new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true});
+const fmt = d => IST.format(new Date(d));
+const LANG = {en:"English", ta:"Tamil", both:"EN + TA"};
+function msg(el, type, html){ $(el).innerHTML = html ? `<div class="msg ${type}">${html}</div>` : ""; }
+function store(k, v){ try{ v === undefined ? localStorage.removeItem(k) : localStorage.setItem(k, v); }catch(e){} }
+function load(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+
+/* ---------------- seal / unseal (AES-GCM 256 + gzip) ----------------
+   File layout: "SVH1" (4 bytes) | IV (12 bytes) | ciphertext            */
+const MAGIC = [83,86,72,49];
+const b64u = b => btoa(String.fromCharCode(...b)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64u = s => Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")), c => c.charCodeAt(0));
+async function pipe(bytes, stream){ return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()); }
+async function seal(obj){
+  const raw = crypto.getRandomValues(new Uint8Array(32)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt"]);
+  const plain = await pipe(new TextEncoder().encode(JSON.stringify(obj)), new CompressionStream("gzip"));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, plain));
+  const out = new Uint8Array(16 + ct.length); out.set(MAGIC,0); out.set(iv,4); out.set(ct,16);
+  return { bytes: out, key: b64u(raw) };
+}
+async function unseal(bytes, keyStr){
+  bytes = new Uint8Array(bytes);
+  if (!MAGIC.every((m,i) => bytes[i] === m)) throw new Error("Not an SVG Horizon sealed file");
+  const key = await crypto.subtle.importKey("raw", unb64u(keyStr), "AES-GCM", false, ["decrypt"]);
+  const plain = new Uint8Array(await crypto.subtle.decrypt({name:"AES-GCM", iv: bytes.slice(4,16)}, key, bytes.slice(16)));
+  return JSON.parse(new TextDecoder().decode(await pipe(plain, new DecompressionStream("gzip"))));
+}
+function b64(bytes){ let s=""; for (let i=0;i<bytes.length;i+=0x8000) s += String.fromCharCode(...bytes.subarray(i,i+0x8000)); return btoa(s); }
+function rand(n=6){ return b64u(crypto.getRandomValues(new Uint8Array(n))).toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,n) || "x"; }
+
+/* ---------------- settings ---------------- */
+function settings(){
+  return { owner: load("svh_owner") || CONFIG.DEFAULTS.owner, repo: load("svh_repo") || CONFIG.DEFAULTS.repo,
+           branch: load("svh_branch") || CONFIG.DEFAULTS.branch, site: (load("svh_site") || CONFIG.DEFAULTS.site).replace(/\/+$/,""),
+           token: load("svh_token") || "" };
+}
+function fillSettings(){ const s = settings(); $("sOwner").value=s.owner; $("sRepo").value=s.repo; $("sBranch").value=s.branch; $("sSite").value=s.site; $("sToken").value=s.token; }
+
+/* ---------------- auth ---------------- */
+async function afterLogin(session){
+  const { data: ok, error } = await sb.rpc("is_admin");
+  if (error || !ok){ await sb.auth.signOut(); msg("loginMsg","err","This account is not an SVG Horizon admin."); return; }
+  $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+  $("btnLogout").classList.remove("hidden"); $("who").textContent = session.user.email;
+  fillSettings(); loadExams();
+}
+$("btnLogin").onclick = async () => {
+  msg("loginMsg"); $("btnLogin").disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email: $("loginEmail").value.trim(), password: $("loginPass").value });
+  $("btnLogin").disabled = false;
+  if (error) return msg("loginMsg","err", esc(error.message));
+  afterLogin(data.session);
+};
+$("loginPass").addEventListener("keydown", e => { if (e.key === "Enter") $("btnLogin").click(); });
+$("btnLogout").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+sb.auth.getSession().then(({data}) => { if (data.session) afterLogin(data.session); });
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+function showTab(t){
+  document.querySelectorAll("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  ["exams","editor","results","settings"].forEach(x => $("tab-"+x).classList.toggle("hidden", x !== t));
+  if (t === "results") fillResultExams();
+}
+
+/* =====================================================================
+   EXAMS LIST
+   ===================================================================== */
+let EXAMS = [];
+function statusOf(e){
+  const now = Date.now(), s = new Date(e.start_at).getTime(), end = s + e.duration_min*60000;
+  if (!e.published) return ["Draft","p-draft"];
+  if (now < s - e.join_before_min*60000) return ["Scheduled","p-sched"];
+  if (now < end) return ["Live","p-live"];
+  return ["Finished","p-done"];
+}
+async function loadExams(){
+  msg("examsMsg");
+  const { data, error } = await sb.from("exams")
+    .select("id,title,subject,topics,language,start_at,duration_min,join_before_min,join_after_min,total_questions,mark_correct,mark_wrong,published,paper_file,solutions_file")
+    .order("start_at", { ascending: false });
+  if (error) return msg("examsMsg","err", esc(error.message));
+  EXAMS = data || [];
+  const tb = $("examsTbl").querySelector("tbody");
+  if (!EXAMS.length){ tb.innerHTML = `<tr><td colspan="6" class="muted">No exams yet. Click “➕ New exam”.</td></tr>`; return; }
+  tb.innerHTML = EXAMS.map(e => { const [st, cls] = statusOf(e); return `<tr>
+    <td>${fmt(e.start_at)}<div class="muted">${e.duration_min} min</div></td>
+    <td><b>${esc(e.title)}</b><div class="muted">${esc(e.id)}</div></td>
+    <td>${e.total_questions}</td><td>${LANG[e.language]}</td>
+    <td><span class="pill ${cls}">${st}</span></td>
+    <td><div class="row">
+      <button class="btn sec small" data-act="preview" data-id="${esc(e.id)}">👁 Preview</button>
+      <button class="btn sec small" data-act="edit" data-id="${esc(e.id)}">✏️ Edit</button>
+      <button class="btn sec small" data-act="results" data-id="${esc(e.id)}">📊</button>
+      ${e.published ? `<button class="btn sec small" data-act="unpub" data-id="${esc(e.id)}">Hide</button>`
+                    : `<button class="btn sec small" data-act="pub" data-id="${esc(e.id)}">Publish</button>`}
+      <button class="btn sec small" data-act="del" data-id="${esc(e.id)}">🗑</button></div></td></tr>`; }).join("");
+  tb.querySelectorAll("button[data-act]").forEach(b => b.onclick = () => examAction(b.dataset.act, b.dataset.id));
+}
+$("btnReloadExams").onclick = loadExams;
+
+async function examAction(act, id){
+  const e = EXAMS.find(x => x.id === id); if (!e) return;
+  if (act === "preview") return previewFromSite(e);
+  if (act === "edit") return startEdit(e);
+  if (act === "results"){ showTab("results"); $("rExam").value = id; return loadResults(); }
+  if (act === "pub"){ const ok = await filesReachable(e); if (!ok) return msg("examsMsg","err","The sealed files are not on the website yet. Open ✏️ Edit and finish step 4."); }
+  if (act === "pub" || act === "unpub"){
+    const { error } = await sb.from("exams").update({ published: act === "pub" }).eq("id", id);
+    if (error) return msg("examsMsg","err", esc(error.message));
+    return loadExams();
+  }
+  if (act === "del"){
+    const { count } = await sb.from("attempts").select("emis", { count: "exact", head: true }).eq("exam_id", id);
+    const typed = prompt(`Delete "${e.title}"?\nThis also deletes its answer key and ${count || 0} student attempt(s). This cannot be undone.\n\nType DELETE to confirm:`);
+    if (typed !== "DELETE") return;
+    const { error } = await sb.from("exams").delete().eq("id", id);
+    if (error) return msg("examsMsg","err", esc(error.message));
+    msg("examsMsg","ok","Exam deleted. (The sealed files on GitHub are harmless without the keys; you may delete that folder too.)");
+    loadExams();
+  }
+}
+
+/* ---------------- preview ---------------- */
+let PREVIEW = null;
+function renderPreview(){
+  if (!PREVIEW) return;
+  const { paper, sol } = PREVIEW, lang = $("previewLang").value;
+  const L = "ABCD";
+  const part = (b, cls) => b ? `<div class="${cls}"><div><b>${esc(b.q)}</b></div>${b.o.map((o,i)=>`<div class="opt ${sol && sol.a[paperIndex]===L[i]?"right":""}">${L[i]}. ${esc(o)}</div>`).join("")}</div>` : "";
+  let paperIndex = 0;
+  $("previewBody").innerHTML = `<p class="muted">${paper.n} questions · language: ${LANG[paper.lang]}${sol ? " · correct answers highlighted" : ""}</p>` +
+    paper.q.map((q, i) => { paperIndex = i;
+      const en = (lang !== "ta") ? part(q.en, "") : "", ta = (lang !== "en") ? part(q.ta, "ta") : "";
+      const ex = sol && sol.e[i] ? [lang!=="ta"?sol.e[i][0]:"", lang!=="en"?sol.e[i][1]:""].filter(Boolean) : [];
+      return `<div class="q"><div class="muted">Q${q.n}${q.s ? " · "+esc(q.s) : ""}</div>${en}${en&&ta?'<div style="height:6px"></div>':""}${ta}
+        ${ex.length ? `<div class="exp">💡 ${ex.map(esc).join("<br>")}</div>` : ""}</div>`; }).join("");
+  $("previewCard").classList.remove("hidden");
+}
+$("previewLang").onchange = renderPreview;
+$("btnClosePreview").onclick = () => $("previewCard").classList.add("hidden");
+async function previewFromSite(e){
+  showTab("exams"); msg("examsMsg","info","Loading preview from the website…");
+  try{
+    const { data: k, error } = await sb.from("exams").select("paper_key,solutions_key").eq("id", e.id).single();
+    if (error) throw error;
+    const site = settings().site;
+    const get = async p => { const r = await fetch(`${site}/${p}?t=${Date.now()}`, {cache:"no-store"}); if (!r.ok) throw new Error(`${p} not found on the website (HTTP ${r.status})`); return r.arrayBuffer(); };
+    const paper = await unseal(await get(e.paper_file), k.paper_key);
+    const sol = await unseal(await get(e.solutions_file), k.solutions_key);
+    PREVIEW = { paper, sol }; $("previewTitle").textContent = "Preview · " + e.title + " (from website)";
+    msg("examsMsg","ok","✓ Both sealed files downloaded from the website and unlocked correctly."); renderPreview();
+    $("previewCard").scrollIntoView({behavior:"smooth"});
+  }catch(err){ msg("examsMsg","err","Preview failed: " + esc(err.message)); }
+}
+
+/* =====================================================================
+   EDITOR: details → Excel → seal & save → publish
+   ===================================================================== */
+const ED = { mode: "new", id: null, parsed: null, sealed: null, hasAttempts: false };
+const REQUIRED_HEADERS = ["Q_No","Subject","Chapter","Topic","Difficulty","Question_EN","Option_A_EN","Option_B_EN","Option_C_EN","Option_D_EN",
+  "Question_TA","Option_A_TA","Option_B_TA","Option_C_TA","Option_D_TA","Answer","Explanation_EN","Explanation_TA"];
+function slug(s){ return String(s).toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40); }
+function examIdFromForm(){ return ED.mode === "edit" ? ED.id : `${$("fDate").value || "date"}-${slug($("fTitle").value) || "exam"}`; }
+function updateIdNote(){ $("fIdNote").textContent = "Exam ID: " + examIdFromForm(); }
+["fTitle","fDate"].forEach(i => $(i).addEventListener("input", updateIdNote));
+function setStep(n){ for (let i=1;i<=4;i++){ $("st"+i).className = i < n ? "done" : i === n ? "on" : ""; } }
+
+function resetEditor(){
+  Object.assign(ED, { mode:"new", id:null, parsed:null, sealed:null, hasAttempts:false });
+  ["fTitle","fSubject","fTopics","fDate"].forEach(i => $(i).value = "");
+  $("fLang").value="both"; $("fTime").value="10:00"; $("fDur").value=180; $("fMarkC").value=4; $("fMarkW").value=-1; $("fJoinB").value=10; $("fJoinA").value=10;
+  $("fFile").value = ""; ["checkMsg","checkBody","saveMsg","pubMsg"].forEach(i => $(i).innerHTML = "");
+  $("pubAuto").classList.add("hidden"); $("pubManual").classList.add("hidden");
+  $("btnSave").disabled = true; $("btnPreviewLocal").disabled = true; $("btnSaveDetails").classList.add("hidden");
+  $("editorTitle").textContent = "1 · Exam details"; document.querySelector('[data-tab="editor"]').textContent = "➕ New exam";
+  setStep(1); updateIdNote();
+}
+$("btnResetEditor").onclick = resetEditor;
+
+async function startEdit(e){
+  resetEditor(); showTab("editor");
+  Object.assign(ED, { mode:"edit", id:e.id });
+  const ist = new Date(new Date(e.start_at).getTime() + 330*60000).toISOString();
+  $("fTitle").value=e.title; $("fSubject").value=e.subject||""; $("fTopics").value=e.topics||""; $("fLang").value=e.language;
+  $("fDate").value=ist.slice(0,10); $("fTime").value=ist.slice(11,16); $("fDur").value=e.duration_min;
+  $("fMarkC").value=e.mark_correct; $("fMarkW").value=e.mark_wrong; $("fJoinB").value=e.join_before_min; $("fJoinA").value=e.join_after_min;
+  $("editorTitle").textContent = "1 · Exam details (editing)"; document.querySelector('[data-tab="editor"]').textContent = "✏️ Edit exam";
+  $("btnSaveDetails").classList.remove("hidden"); updateIdNote();
+  const { count } = await sb.from("attempts").select("emis",{count:"exact",head:true}).eq("exam_id", e.id);
+  ED.hasAttempts = (count||0) > 0;
+  msg("checkMsg", ED.hasAttempts ? "warn" : "info", ED.hasAttempts
+    ? `${count} student(s) have already attempted this exam, so the question paper can no longer be replaced. You can still change the details above and click “Save details only”.`
+    : "To change only the date, time or marks, edit above and click “Save details only”. To replace the questions, upload a new Excel.");
+  if (e.paper_file){ ED.sealed = { id:e.id, paper_file:e.paper_file, solutions_file:e.solutions_file, existing:true }; showPublish(); }
+}
+
+/* ---------------- Excel reading & checking ---------------- */
+const clean = v => String(v ?? "").replace(/ /g," ").trim();
+function normLang(v){ v = clean(v).toLowerCase(); if (v.startsWith("english only")) return "en"; if (v.startsWith("tamil only")) return "ta"; if (v.includes("english") && v.includes("tamil")) return "both"; return null; }
+function normDiff(v){ v = clean(v).toLowerCase(); return {easy:"Easy",medium:"Medium",hard:"Hard"}[v] || null; }
+function normAns(v){ v = clean(v).toUpperCase().replace(/[().\s]/g,""); return /^[ABCD]$/.test(v) ? v : null; }
+
+function parseWorkbook(ab){
+  const wb = XLSX.read(ab, { type: "array" });
+  const ws = wb.Sheets["Questions"];
+  if (!ws) throw new Error("No sheet named “Questions”. Please use the SVG Horizon Question Template.");
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false, blankrows: true });
+  const head = (rows[0] || []).map(clean);
+  const col = {}; head.forEach((h, i) => col[h] = i);
+  const missing = REQUIRED_HEADERS.filter(h => !(h in col));
+  if (missing.length) throw new Error("Missing column heading(s): " + missing.join(", ") + ". Do not rename row 1.");
+  const info = {};
+  const pi = wb.Sheets["Paper_Info"];
+  if (pi){ const g = a => clean(pi[a] && (pi[a].w ?? pi[a].v));
+    Object.assign(info, { title:g("B3"), type:g("B4"), subject:g("B5"), lang:normLang(g("B6")), n:parseInt(g("B7"),10)||null, by:g("B8"), school:g("B9") }); }
+  const get = (r, h) => clean(r[col[h]]);
+  const dataCols = REQUIRED_HEADERS.slice(1).concat("Image_File" in col ? ["Image_File"] : []);
+  const list = [];
+  for (let i = 1; i < rows.length; i++){
+    const r = rows[i] || [];
+    const filled = dataCols.some(h => get(r, h) !== "");
+    list.push({ excelRow: i + 1, filled, r });
+  }
+  while (list.length && !list[list.length-1].filled) list.pop();   // drop trailing empty rows
+  return { info, list, get, hasImage: "Image_File" in col };
+}
+
+function checkParsed(p, lang){
+  const errors = [], warnings = [], qs = [];
+  p.list.forEach((row, idx) => {
+    const n = idx + 1, R = row.excelRow, g = h => p.get(row.r, h);
+    if (!row.filled){ errors.push([R, n, "Empty row in the middle of the paper – delete it or fill it (no gaps allowed)."]); return; }
+    const q = { n, subject:g("Subject"), chapter:g("Chapter"), topic:g("Topic"),
+      difficulty:normDiff(g("Difficulty")), answer:normAns(g("Answer")),
+      en:{ q:g("Question_EN"), o:["A","B","C","D"].map(x => g(`Option_${x}_EN`)) },
+      ta:{ q:g("Question_TA"), o:["A","B","C","D"].map(x => g(`Option_${x}_TA`)) },
+      exp:[g("Explanation_EN"), g("Explanation_TA")], img: p.hasImage ? g("Image_File") : "" };
+    if (!q.topic) errors.push([R, n, "Topic is empty."]);
+    if (!q.difficulty) errors.push([R, n, `Difficulty “${esc(g("Difficulty"))}” – must be Easy, Medium or Hard.`]);
+    if (!q.answer) errors.push([R, n, `Answer “${esc(g("Answer"))}” – must be A, B, C or D.`]);
+    const blanks = b => [b.q, ...b.o].filter(x => !x).length;
+    if (lang !== "ta" && blanks(q.en)) errors.push([R, n, "English question or an English option is empty."]);
+    if (lang !== "en" && blanks(q.ta)) errors.push([R, n, "Tamil question or a Tamil option is empty."]);
+    const opts = (lang === "ta" ? q.ta.o : q.en.o).map(x => x.toLowerCase());
+    if (new Set(opts.filter(Boolean)).size < opts.filter(Boolean).length) warnings.push([R, n, "Two options have the same text."]);
+    if (q.img) warnings.push([R, n, `Image “${esc(q.img)}” – diagrams are not supported yet; the question will show without it.`]);
+    qs.push(q);
+  });
+  if (!qs.length) errors.push(["–", "–", "No questions found in the Questions sheet."]);
+  return { errors, warnings, qs };
+}
+
+$("fFile").onchange = async ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  ["checkMsg","checkBody","saveMsg"].forEach(i => $(i).innerHTML = "");
+  ED.parsed = null; $("btnSave").disabled = true;
+  if (ED.hasAttempts){ msg("checkMsg","err","Students have already attempted this exam – the paper cannot be replaced."); ev.target.value=""; return; }
+  try{
+    const p = parseWorkbook(await f.arrayBuffer());
+    if (ED.mode === "new"){                                     // prefill from Paper_Info
+      if (p.info.title && !$("fTitle").value) $("fTitle").value = p.info.title;
+      if (p.info.subject && !$("fSubject").value) $("fSubject").value = p.info.subject;
+      if (p.info.lang) $("fLang").value = p.info.lang;
+      updateIdNote();
+    }
+    ED.file = p; runCheck();
+  }catch(err){ msg("checkMsg","err", esc(err.message)); }
+};
+$("fLang").onchange = () => { if (ED.file) runCheck(); };
+
+function runCheck(){
+  const lang = $("fLang").value, c = checkParsed(ED.file, lang), info = ED.file.info;
+  const diff = { Easy:0, Medium:0, Hard:0 }; c.qs.forEach(q => q.difficulty && diff[q.difficulty]++);
+  const topics = {}; c.qs.forEach(q => { const k = (q.subject ? q.subject+" · " : "") + q.topic; if (q.topic) topics[k] = (topics[k]||0) + 1; });
+  let html = `<div class="stats" style="margin-top:12px">
+    <div class="stat"><b>${c.qs.length}</b><span>questions found</span></div>
+    <div class="stat"><b>${diff.Easy} / ${diff.Medium} / ${diff.Hard}</b><span>Easy / Medium / Hard</span></div>
+    <div class="stat"><b>${Object.keys(topics).length}</b><span>topics</span></div>
+    <div class="stat"><b>${c.errors.length}</b><span>problems</span></div></div>`;
+  if (info.n && info.n !== c.qs.length) c.warnings.unshift(["Paper_Info","–",`Paper_Info says ${info.n} questions, but ${c.qs.length} were found.`]);
+  const tbl = (rows, title) => `<h3>${title}</h3><div class="tbl"><table><thead><tr><th>Excel row</th><th>Q</th><th>What to fix</th></tr></thead><tbody>${
+      rows.slice(0,200).map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table></div>${rows.length>200?`<p class="muted">…and ${rows.length-200} more.</p>`:""}`;
+  if (c.errors.length) html += tbl(c.errors, "❌ Must fix (send back to the teacher)");
+  if (c.warnings.length) html += tbl(c.warnings, "⚠️ Please check");
+  html += `<h3>Topics in this paper</h3><div class="muted">${Object.entries(topics).map(([k,v]) => `${esc(k)} (${v})`).join(" · ")}</div>`;
+  $("checkBody").innerHTML = html;
+  if (c.errors.length){ msg("checkMsg","err",`${c.errors.length} problem(s) found. Fix them in the Excel and upload again.`); ED.parsed = null; $("btnSave").disabled = true; setStep(2); }
+  else { msg("checkMsg","ok",`✓ All ${c.qs.length} questions look good${info.by ? " (prepared by " + esc(info.by) + ")" : ""}.`); ED.parsed = c; $("btnSave").disabled = false; setStep(3); }
+}
+
+/* ---------------- form → exam row ---------------- */
+function formRow(){
+  const title = $("fTitle").value.trim(), date = $("fDate").value, time = $("fTime").value;
+  const need = [[!title,"exam title"],[!date,"exam date"],[!time,"start time"]].filter(x => x[0]).map(x => x[1]);
+  if (need.length) throw new Error("Please fill: " + need.join(", ") + ".");
+  const dur = +$("fDur").value, jb = +$("fJoinB").value, ja = +$("fJoinA").value;
+  if (!(dur > 0)) throw new Error("Duration must be more than 0 minutes.");
+  if (ja >= dur) throw new Error("Late-join minutes must be less than the duration.");
+  return { title, subject: $("fSubject").value.trim() || null, topics: $("fTopics").value.trim() || null,
+    language: $("fLang").value, start_at: new Date(`${date}T${time}:00+05:30`).toISOString(), duration_min: dur,
+    join_before_min: jb, join_after_min: ja, mark_correct: +$("fMarkC").value, mark_wrong: +$("fMarkW").value };
+}
+
+$("btnSaveDetails").onclick = async () => {
+  try{
+    const row = formRow();
+    const cur = EXAMS.find(x => x.id === ED.id);
+    if (cur && row.language !== cur.language){ $("fLang").value = cur.language; row.language = cur.language;
+      msg("checkMsg","warn","Language cannot be changed without uploading the Excel again, so it was kept as " + LANG[cur.language] + "."); }
+    const { error } = await sb.from("exams").update(row).eq("id", ED.id);
+    if (error) throw error;
+    msg("saveMsg","ok","✓ Details saved."); loadExams();
+  }catch(err){ msg("saveMsg","err", esc(err.message)); }
+};
+
+/* ---------------- seal & save ---------------- */
+$("btnSave").onclick = async () => {
+  const btn = $("btnSave"); btn.disabled = true; msg("saveMsg","info","Sealing and saving…");
+  try{
+    const row = formRow(), c = ED.parsed, lang = row.language, id = examIdFromForm();
+    if (ED.mode === "new"){
+      const { data: ex } = await sb.from("exams").select("id").eq("id", id).maybeSingle();
+      if (ex) throw new Error(`An exam with ID “${id}” already exists. Change the title or date, or use ✏️ Edit on the existing exam.`);
+    } else {
+      const { count } = await sb.from("attempts").select("emis",{count:"exact",head:true}).eq("exam_id", id);
+      if (count) throw new Error("Students have already attempted this exam – the paper cannot be replaced.");
+    }
+    const paper = { v:1, id, title: row.title, lang, n: c.qs.length,
+      q: c.qs.map(q => { const o = { n:q.n, s:q.subject || undefined }; if (lang !== "ta") o.en = q.en; if (lang !== "en") o.ta = q.ta; return o; }) };
+    const sol = { v:1, id, a: c.qs.map(q => q.answer).join(""),
+      e: c.qs.map(q => [lang !== "ta" ? q.exp[0] : "", lang !== "en" ? q.exp[1] : ""]) };
+    const P = await seal(paper), S = await seal(sol);
+    const tag = rand(8), dir = `${CONFIG.EXAM_DIR}/${id}`;
+    const files = { paper_file: `${dir}/p-${tag}.bin`, solutions_file: `${dir}/s-${tag}.bin` };
+    const full = { ...row, id, total_questions: c.qs.length, ...files, paper_key: P.key, solutions_key: S.key, published: false };
+    const { error: e1 } = await sb.from("exams").upsert(full); if (e1) throw e1;
+    const { error: e2 } = await sb.from("answer_keys").delete().eq("exam_id", id); if (e2) throw e2;
+    const keys = c.qs.map(q => ({ exam_id:id, q_no:q.n, answer:q.answer, subject:q.subject||null, chapter:q.chapter||null, topic:q.topic, difficulty:q.difficulty }));
+    for (let i = 0; i < keys.length; i += 500){ const { error } = await sb.from("answer_keys").insert(keys.slice(i, i+500)); if (error) throw error; }
+    Object.assign(ED, { mode:"edit", id, sealed: { id, ...files, paperBytes: P.bytes, solBytes: S.bytes } });
+    PREVIEW = { paper, sol }; $("btnPreviewLocal").disabled = false; $("btnSaveDetails").classList.remove("hidden");
+    msg("saveMsg","ok",`✓ Sealed and saved as a <b>draft</b>. Paper ${(P.bytes.length/1024).toFixed(0)} KB · Solutions ${(S.bytes.length/1024).toFixed(0)} KB. The answer key (${keys.length} rows) is stored privately in Supabase.`);
+    setStep(4); showPublish(); loadExams();
+  }catch(err){ msg("saveMsg","err", esc(err.message || String(err))); }
+  btn.disabled = !ED.parsed;
+};
+$("btnPreviewLocal").onclick = () => { showTab("exams"); $("previewTitle").textContent = "Preview · " + $("fTitle").value + " (before publishing)"; renderPreview(); $("previewCard").scrollIntoView({behavior:"smooth"}); };
+
+/* ---------------- publish ---------------- */
+function showPublish(){
+  const s = ED.sealed, auto = !!settings().token && !!s.paperBytes;
+  $("pubAuto").classList.toggle("hidden", !auto);
+  $("pubManual").classList.toggle("hidden", auto);
+  $("manualPath").textContent = s.paper_file.replace(/\/[^/]+$/,"/");
+  $("btnDlPaper").disabled = $("btnDlSol").disabled = !s.paperBytes;
+  if (!s.paperBytes) msg("pubMsg","info","These sealed files were created earlier. If they are already on the website, click “Check &amp; publish”. To create new ones, upload the Excel again.");
+}
+function download(bytes, name){ const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([bytes],{type:"application/octet-stream"})); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
+$("btnDlPaper").onclick = () => download(ED.sealed.paperBytes, ED.sealed.paper_file.split("/").pop());
+$("btnDlSol").onclick = () => download(ED.sealed.solBytes, ED.sealed.solutions_file.split("/").pop());
+
+async function ghPut(path, bytes, message){
+  const s = settings(), api = `https://api.github.com/repos/${s.owner}/${s.repo}/contents/${path}`;
+  const h = { Authorization: `Bearer ${s.token}`, Accept: "application/vnd.github+json" };
+  let sha; const g = await fetch(`${api}?ref=${encodeURIComponent(s.branch)}`, { headers: h });
+  if (g.ok) sha = (await g.json()).sha;
+  const r = await fetch(api, { method: "PUT", headers: { ...h, "Content-Type": "application/json" },
+    body: JSON.stringify({ message, content: b64(bytes), branch: s.branch, ...(sha ? { sha } : {}) }) });
+  if (!r.ok){ const t = await r.json().catch(() => ({})); throw new Error(`GitHub upload failed (${r.status}): ${t.message || ""}`); }
+}
+async function filesReachable(e){
+  const site = settings().site;
+  try{
+    for (const p of [e.paper_file, e.solutions_file]){
+      const r = await fetch(`${site}/${p}?t=${Date.now()}`, { cache:"no-store" });
+      if (!r.ok) return false;
+      const b = new Uint8Array(await r.arrayBuffer());
+      if (!MAGIC.every((m,i) => b[i] === m)) return false;
+    }
+    return true;
+  }catch(err){ return false; }
+}
+async function waitAndPublish(){
+  const s = ED.sealed; const t0 = Date.now();
+  while (Date.now() - t0 < 6*60000){
+    msg("pubMsg","info",`Waiting for the website to update… (${Math.round((Date.now()-t0)/1000)} s, usually 30–90 s)`);
+    if (await filesReachable(s)){
+      const { error } = await sb.from("exams").update({ published: true }).eq("id", s.id);
+      if (error) throw error;
+      msg("pubMsg","ok",`🎉 Published! The files are live and “${esc($("fTitle").value)}” now appears in the student calendar. Tip: use 👁 Preview in the Exams tab to double-check.`);
+      setStep(5); loadExams(); return;
+    }
+    await new Promise(r => setTimeout(r, 10000));
+  }
+  throw new Error("The files did not appear on the website within 6 minutes. Check the GitHub upload, then click publish again.");
+}
+$("btnPublishAuto").onclick = async () => {
+  const b = $("btnPublishAuto"); b.disabled = true;
+  try{
+    const s = ED.sealed; msg("pubMsg","info","Uploading sealed files to GitHub…");
+    await ghPut(s.paper_file, s.paperBytes, `Exam ${s.id}: sealed paper`);
+    await ghPut(s.solutions_file, s.solBytes, `Exam ${s.id}: sealed solutions`);
+    await waitAndPublish();
+  }catch(err){ msg("pubMsg","err", esc(err.message)); }
+  b.disabled = false;
+};
+$("btnCheckPublish").onclick = async () => {
+  const b = $("btnCheckPublish"); b.disabled = true;
+  try{ await waitAndPublish(); }catch(err){ msg("pubMsg","err", esc(err.message)); }
+  b.disabled = false;
+};
+
+/* =====================================================================
+   RESULTS
+   ===================================================================== */
+async function fillResultExams(){
+  if (!EXAMS.length) await loadExams();
+  const cur = $("rExam").value;
+  $("rExam").innerHTML = EXAMS.map(e => `<option value="${esc(e.id)}">${fmt(e.start_at)} · ${esc(e.title)}</option>`).join("");
+  if (cur) $("rExam").value = cur;
+}
+$("btnLoadResults").onclick = loadResults;
+let RES = null;
+async function loadResults(){
+  const id = $("rExam").value, e = EXAMS.find(x => x.id === id); if (!e) return;
+  msg("resMsg","info","Loading…"); $("resBody").innerHTML = "";
+  try{
+    const { data: keys, error: ek } = await sb.from("answer_keys").select("q_no,answer,subject,topic,difficulty").eq("exam_id", id).order("q_no");
+    if (ek) throw ek;
+    let att = [];
+    for (let from = 0; ; from += 1000){
+      const { data, error } = await sb.from("attempts")
+        .select("emis,school,class,started_at,submitted_at,answers,score,correct,wrong,skipped,students(name)")
+        .eq("exam_id", id).order("emis").range(from, from + 999);
+      if (error) throw error;
+      att = att.concat(data); msg("resMsg","info",`Loading… ${att.length} students`);
+      if (data.length < 1000) break;
+    }
+    const max = e.total_questions * e.mark_correct;
+    const sub = att.filter(a => a.submitted_at);
+    const avg = a => a.length ? a.reduce((s,x) => s + (+x.score), 0) / a.length : 0;
+    // topic-wise across district
+    const T = {};
+    keys.forEach(k => { const t = (k.subject ? k.subject+" · " : "") + k.topic; T[t] = T[t] || { t, qs:[], c:0, n:0 }; T[t].qs.push(k); });
+    sub.forEach(a => keys.forEach(k => { const t = (k.subject ? k.subject+" · " : "") + k.topic, ch = a.answers[k.q_no-1]; T[t].n++; if (ch === k.answer) T[t].c++; }));
+    const topics = Object.values(T).map(x => ({ ...x, pct: x.n ? 100 * x.c / x.n : 0 })).sort((a,b) => a.pct - b.pct);
+    // school-wise
+    const S = {};
+    att.forEach(a => { const s = a.school || "(blank)"; S[s] = S[s] || { s, reg:0, sub:[] }; S[s].reg++; if (a.submitted_at) S[s].sub.push(a); });
+    const schools = Object.values(S).map(x => ({ ...x, avg: avg(x.sub) })).sort((a,b) => b.avg - a.avg);
+    const low = sub.filter(a => a.score < 0.4 * max).sort((a,b) => a.score - b.score);
+    RES = { e, att, schools, topics, max };
+    const scores = sub.map(a => +a.score);
+    const pc = v => `${(100*v/max).toFixed(0)}%`;
+    const bar = p => `<div class="bar"><i style="width:${Math.max(0,Math.min(100,p))}%"></i></div>`;
+    $("resBody").innerHTML = `
+      <div class="card"><h2>${esc(e.title)} · ${fmt(e.start_at)}</h2>
+        <div class="stats">
+          <div class="stat"><b>${att.length}</b><span>registered</span></div>
+          <div class="stat"><b>${sub.length}</b><span>submitted</span></div>
+          <div class="stat"><b>${att.length - sub.length}</b><span>joined, not submitted</span></div>
+          <div class="stat"><b>${avg(sub).toFixed(1)}</b><span>average / ${max} (${pc(avg(sub))})</span></div>
+          <div class="stat"><b>${scores.length ? Math.max(...scores) : "–"}</b><span>highest</span></div>
+          <div class="stat"><b>${scores.length ? Math.min(...scores) : "–"}</b><span>lowest</span></div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="row"><button class="btn" id="dlAll">⬇ All results (CSV)</button><button class="btn sec" id="dlSchools">⬇ School-wise (CSV)</button><button class="btn sec" id="dlTopics">⬇ Topic-wise (CSV)</button></div>
+      </div>
+      <div class="card"><h2>🏫 School-wise</h2><div class="tbl"><table><thead><tr><th>School</th><th>Registered</th><th>Submitted</th><th>Average</th><th></th></tr></thead><tbody>
+        ${schools.map(s => `<tr><td>${esc(s.s)}</td><td>${s.reg}</td><td>${s.sub.length}</td><td>${s.avg.toFixed(1)} (${pc(s.avg)})</td><td>${bar(100*s.avg/max)}</td></tr>`).join("") || `<tr><td colspan="5" class="muted">No data yet</td></tr>`}
+      </tbody></table></div></div>
+      <div class="card"><h2>📚 Topic-wise (weakest first)</h2><div class="tbl"><table><thead><tr><th>Topic</th><th>Questions</th><th>Correct %</th><th></th></tr></thead><tbody>
+        ${topics.map(t => `<tr><td>${esc(t.t)}</td><td>${t.qs.length}</td><td>${t.pct.toFixed(0)}%</td><td>${bar(t.pct)}</td></tr>`).join("")}
+      </tbody></table></div></div>
+      <div class="card"><h2>🤝 Students needing support (below 40%) · ${low.length}</h2><div class="tbl"><table><thead><tr><th>EMIS</th><th>Name</th><th>School</th><th>Class</th><th>Score</th></tr></thead><tbody>
+        ${low.slice(0,300).map(a => `<tr><td>${esc(a.emis)}</td><td>${esc(a.students?.name)}</td><td>${esc(a.school)}</td><td>${esc(a.class)}</td><td>${a.score} (${pc(a.score)})</td></tr>`).join("") || `<tr><td colspan="5" class="muted">None 🎉</td></tr>`}
+      </tbody></table></div>${low.length > 300 ? `<p class="muted">Showing 300 of ${low.length}. Download the CSV for the full list.</p>` : ""}</div>`;
+    $("dlAll").onclick = () => csv(`${id}-results.csv`, [["EMIS","Name","School","Class","Started","Submitted","Score","Max","Percent","Correct","Wrong","Skipped"],
+      ...att.map(a => [a.emis, a.students?.name, a.school, a.class, a.started_at && fmt(a.started_at), a.submitted_at ? fmt(a.submitted_at) : "NOT SUBMITTED",
+        a.score ?? "", max, a.submitted_at ? (100*a.score/max).toFixed(1) : "", a.correct ?? "", a.wrong ?? "", a.skipped ?? ""])]);
+    $("dlSchools").onclick = () => csv(`${id}-schools.csv`, [["School","Registered","Submitted","Average","Max","Percent"],
+      ...schools.map(s => [s.s, s.reg, s.sub.length, s.avg.toFixed(2), max, (100*s.avg/max).toFixed(1)])]);
+    $("dlTopics").onclick = () => csv(`${id}-topics.csv`, [["Topic","Questions","Correct %"], ...topics.map(t => [t.t, t.qs.length, t.pct.toFixed(1)])]);
+    msg("resMsg");
+  }catch(err){ msg("resMsg","err", esc(err.message)); }
+}
+function csv(name, rows){
+  const text = "﻿" + rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  download(new TextEncoder().encode(text), name);
+}
+
+/* =====================================================================
+   SETTINGS & CLEAN-UP
+   ===================================================================== */
+$("btnSaveSettings").onclick = () => {
+  store("svh_owner", $("sOwner").value.trim()); store("svh_repo", $("sRepo").value.trim());
+  store("svh_branch", $("sBranch").value.trim()); store("svh_site", $("sSite").value.trim());
+  store("svh_token", $("sToken").value.trim() || undefined);
+  msg("setMsg","ok","Saved in this browser.");
+};
+$("btnForgetToken").onclick = () => { store("svh_token", undefined); $("sToken").value = ""; msg("setMsg","ok","Token removed from this browser."); };
+$("btnTestGh").onclick = async () => {
+  const s = settings(); if (!s.token) return msg("setMsg","warn","Save a token first.");
+  try{
+    const r = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}`, { headers: { Authorization: `Bearer ${s.token}`, Accept: "application/vnd.github+json" } });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.message || r.status);
+    msg("setMsg", j.permissions?.push ? "ok" : "warn", j.permissions?.push ? `✓ Connected to ${esc(j.full_name)} with write access.` : `Connected to ${esc(j.full_name)}, but the token cannot write. Give it “Contents: Read and write”.`);
+  }catch(err){ msg("setMsg","err","GitHub: " + esc(err.message)); }
+};
+$("btnCleanup").onclick = async () => {
+  const d = $("cBefore").value; if (!d) return msg("cleanMsg","warn","Choose a date.");
+  const cutoff = new Date(`${d}T00:00:00+05:30`).getTime();
+  if (!EXAMS.length) await loadExams();
+  const old = EXAMS.filter(e => new Date(e.start_at).getTime() + e.duration_min*60000 < cutoff);
+  if (!old.length) return msg("cleanMsg","info","No exams ended before that date.");
+  if (prompt(`Delete ALL student attempts of ${old.length} exam(s) that ended before ${d}?\nDownload their CSVs first!\n\nType DELETE to confirm:`) !== "DELETE") return;
+  let n = 0;
+  for (const e of old){ const { count, error } = await sb.from("attempts").delete({ count:"exact" }).eq("exam_id", e.id); if (error) return msg("cleanMsg","err", esc(error.message)); n += count || 0; }
+  msg("cleanMsg","ok",`Deleted ${n} attempt(s) from ${old.length} exam(s).`);
+};
+
+resetEditor();
+</script>
+</body>
+</html>
