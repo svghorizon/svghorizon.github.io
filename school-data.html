@@ -59,6 +59,17 @@
 .note.ok{background:var(--ready-soft);color:var(--ready)}
 .done{text-align:center;padding:28px 18px}
 .done .big{font-family:var(--f-display);font-weight:700;font-size:44px;line-height:1.1;margin:6px 0}
+.filling{position:sticky;top:60px;z-index:6;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap;
+  background:var(--bar);color:var(--on-bar);border:2px solid var(--amber);border-radius:14px;padding:8px 10px 8px 14px;margin:0 0 14px;box-shadow:var(--lift)}
+.filling .fs{font-size:13px;color:var(--on-bar-soft)}
+.filling b{font-size:15px;color:#fff;line-height:1.25}
+.filling > span{min-width:0}
+.filling .btn{flex:none;min-height:34px;padding:5px 12px;font-size:13.5px;background:var(--amber);color:#1b1405}
+.modal{position:fixed;inset:0;background:rgba(10,17,32,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .box{background:var(--surface);border-radius:18px;max-width:460px;width:100%;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.modal .sch{border:2px solid var(--amber);background:var(--amber-soft);border-radius:14px;padding:14px;margin:12px 0;text-align:center}
+.modal .sch b{display:block;font-family:var(--f-display);font-size:22px;line-height:1.25;color:var(--ink)}
+.modal .row2{display:flex;gap:10px;margin-top:14px}.modal .row2 .btn{flex:1}
 .sticky{position:sticky;bottom:0;background:var(--paper);padding:12px 0;border-top:1px solid var(--rule);display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;z-index:5}
 </style>
 </head>
@@ -97,6 +108,7 @@
   </section>
 
   <section id="stuSection" style="display:none">
+    <div class="filling" id="fillingFor"></div>
     <p class="step" style="margin:6px 0 10px">2 · Students</p>
     <div id="students"></div>
     <button class="btn ghost" id="addBtn" type="button">＋ Add another student</button>
@@ -156,10 +168,19 @@ const ALL_EXAMS = EXAM_GROUPS.flatMap(g => g[1]);
 /* ---------- step 1: school ---------- */
 let SCHOOLS = [], SCHOOL = null;
 function setSchool(s){
+  if (SCHOOL && s && SCHOOL.udise === s.udise) return;           // same school picked again: nothing to do
+  if (SCHOOL && document.querySelector(".stu")) saveDraft();       // keep the previous school's unsent cards (for that school only)
+  $("students").innerHTML = ""; alertMsg();                        // never carry cards from one school to another
   SCHOOL = s || null;
   $("schoolMsg").innerHTML = s ? `<div class="school-ok">✓ ${esc(s.name)}<br><span style="font-weight:400">Block: ${esc(s.block)} · UDISE: ${esc(s.udise)}</span></div>` : "";
   $("stuSection").style.display = s ? "" : "none";
-  if (s){ ls("svh_sd_school", s.udise); if (!document.querySelector(".stu")) restoreDraft(); }
+  $("fillingFor").innerHTML = s ? `<span><span class="fs">Filling for · <span class="ta">பள்ளி</span></span><br><b>${esc(s.name)}</b><br><span class="fs">${esc(s.block)} · UDISE ${esc(s.udise)}</span></span>
+    <button type="button" class="btn" id="changeSchool">Change</button>` : "";
+  if (s){ restoreDraft(); $("changeSchool").onclick = resetSchool; }
+}
+function resetSchool(){
+  setSchool(null); $("block").value = ""; fillSchools(""); $("udiseIn").value = "";
+  $("schoolCard").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 function fillSchools(block, pick){
   const list = SCHOOLS.filter(s => s.block === block);
@@ -181,8 +202,7 @@ async function loadSchools(){
     SCHOOLS = await rpc("list_schools");
     const blocks = [...new Set(SCHOOLS.map(s => s.block))].sort();
     $("block").innerHTML = `<option value="">Choose block</option>` + blocks.map(b => `<option>${esc(b)}</option>`).join("");
-    const last = ls("svh_sd_school"), s = SCHOOLS.find(x => x.udise === last);
-    if (s){ $("block").value = s.block; fillSchools(s.block, s.udise); $("udiseIn").value = s.udise; setSchool(s); }
+    ls("svh_sd_school", null);   // the school is never remembered: each visit starts blank
   }catch(e){ $("block").innerHTML = `<option value="">Could not load</option>`; $("schoolMsg").innerHTML = `<div class="note err">Could not load the school list. Check the internet connection and reload the page.</div>`; }
 }
 
@@ -332,13 +352,27 @@ function check(){
   return bad;
 }
 
+/* ---------- big confirmation: shows the school clearly before sending ---------- */
+function confirmSchool(n){
+  return new Promise(res => {
+    const m = document.createElement("div"); m.className = "modal";
+    m.innerHTML = `<div class="box"><p class="step" style="margin:0">Check the school before sending</p>
+      <p class="muted" style="margin:4px 0 0">You are sending <b>${n} student${n > 1 ? "s" : ""}</b> for:</p>
+      <div class="sch"><b>${esc(SCHOOL.name)}</b><span class="muted">${esc(SCHOOL.block)} block · UDISE ${esc(SCHOOL.udise)}</span></div>
+      <p class="muted" style="margin:0">Is this the correct school? After sending, entries cannot be viewed or changed from this form.<br><span class="ta">இது சரியான பள்ளியா?</span></p>
+      <div class="row2"><button class="btn ghost" data-a="0">No, go back</button><button class="btn amber" data-a="1">Yes, send</button></div></div>`;
+    document.body.appendChild(m);
+    m.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { m.remove(); res(b.dataset.a === "1"); });
+  });
+}
+
 /* ---------- submit ---------- */
 $("submitBtn").onclick = async () => {
   if (!SCHOOL) return;
   const n = check();
   if (n){ alertMsg("err", `Please fix ${n} item${n > 1 ? "s" : ""} marked in red.`); document.querySelector(".has-err").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
   const list = cards().map(getData);
-  if (!confirm(`Send ${list.length} student${list.length > 1 ? "s" : ""} for ${SCHOOL.name}?\n\nAfter sending, entries cannot be viewed or changed from this form.`)) return;
+  if (!(await confirmSchool(list.length))) return;
   const b = $("submitBtn"); b.disabled = true; b.textContent = "Sending…"; alertMsg();
   try{
     const r = await rpc("submit_school_data", { p_udise: SCHOOL.udise, p_students: list });
