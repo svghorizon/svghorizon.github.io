@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>School Data · SVG Horizon</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#13203A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Tamil:wdth,wght@100..125,400..800&family=Hind+Madurai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ============================================================
+   SVG Horizon — School Data form (colours come from style.css)
+   ============================================================ */
+.bar-link{border:1px solid rgba(245,243,236,.22);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--on-bar-soft);text-decoration:none;white-space:nowrap}
+.bar-link:hover{color:var(--on-bar);border-color:var(--amber)}
+.wrap{max-width:860px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:18px;box-shadow:var(--lift);margin-bottom:16px}
+.step{font-family:var(--f-display);font-weight:700;font-size:20px;margin:0 0 4px}
+.muted{color:var(--ink-soft);font-size:14.5px}
+.ta{font-family:var(--f-display)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.f label{display:block;font-weight:600;font-size:14.5px;margin-bottom:4px}
+.f label small{font-weight:400;color:var(--ink-soft)}
+.f label .req{color:#b4463c}
+.f input,.f select{width:100%;padding:11px 12px;font:inherit;font-size:16px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--ink)}
+.f input:focus,.f select:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 4px var(--amber-soft)}
+.f input[readonly]{background:var(--tint);font-weight:700}
+.f.bad input,.f.bad select{border-color:#b4463c;box-shadow:0 0 0 3px rgba(180,70,60,.15)}
+.f .err{color:#b4463c;font-size:13px;margin-top:3px}
+.or{display:flex;align-items:center;gap:10px;color:var(--ink-soft);font-size:13px;margin:12px 0}
+.or:before,.or:after{content:"";flex:1;height:1px;background:var(--rule)}
+.school-ok{margin-top:12px;border-radius:12px;padding:12px 14px;background:var(--ready-soft);color:var(--ready);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:12px 22px;font-weight:600;font-size:16px;background:var(--bar);color:var(--on-bar);min-height:46px}
+.btn.amber{background:var(--amber);color:#1b1405}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--rule)}
+.btn.small{min-height:36px;padding:6px 14px;font-size:14px}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.stu{scroll-margin-top:90px;border:1.5px solid var(--rule);border-radius:var(--radius);padding:16px;margin-bottom:14px;background:var(--surface)}
+.stu.has-err{border-color:#b4463c}
+.stu-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.stu-h b{font-family:var(--f-display);font-size:18px}
+.sec{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--amber-ink);margin:16px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);border-radius:999px;padding:6px 12px;font-size:14.5px;cursor:pointer;background:var(--surface)}
+.chips input{accent-color:var(--amber);width:16px;height:16px}
+.chips label.on{background:var(--amber-soft);border-color:var(--amber)}
+.xg{margin-top:10px}.xg h4{margin:0 0 6px;font-size:13px;color:var(--ink-soft);font-weight:700}
+.xbox{border:1px solid var(--rule);border-radius:12px;padding:10px 12px;max-height:360px;overflow:auto;background:var(--paper)}
+.addx{display:flex;gap:8px;margin-top:10px}.addx input{flex:1}
+.chips.custom label{background:var(--amber-soft);border-color:var(--amber)}
+.note{border-radius:12px;padding:12px 14px;font-size:15px;margin:12px 0}
+.note.info{background:var(--tint)}
+.note.warn{background:var(--amber-soft);color:var(--amber-ink)}
+.note.err{background:#fde7e6;color:#9b2c24}
+:root[data-theme="dark"] .note.err{background:#3a1b1a;color:#f2b3ad}
+.note.ok{background:var(--ready-soft);color:var(--ready)}
+.done{text-align:center;padding:28px 18px}
+.done .big{font-family:var(--f-display);font-weight:700;font-size:44px;line-height:1.1;margin:6px 0}
+.sticky{position:sticky;bottom:0;background:var(--paper);padding:12px 0;border-top:1px solid var(--rule);display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;z-index:5}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-in">
+    <span class="bar-side"><a class="bar-link" href="index.html">← Home</a></span>
+    <a class="brand" href="index.html" style="text-decoration:none" aria-label="SVG Horizon">
+      <svg class="brand-mark" viewBox="0 0 44 30" aria-hidden="true"><path class="sun" d="M9 23a13 13 0 0 1 26 0z"/><path class="rays" d="M22 3.5v3.5M9.5 8.6l2.5 2.5M34.5 8.6L32 11.1M4 15.5h3.4M40 15.5h-3.4"/><path class="line" d="M2 26.5h40"/></svg>
+      <span class="brand-name">SVG Horizon</span>
+    </a>
+    <span class="bar-side end"><button class="theme-btn" id="themeBtn">Dark</button></span>
+  </div>
+</header>
+
+<div class="wrap">
+<main id="app">
+  <div class="page-head">
+    <p class="kicker">School Data · <span class="ta">பள்ளி விவரங்கள்</span></p>
+    <h1>Students who joined premier institutions</h1>
+    <p>Government school students of the last 3 academic years (2023-24 to 2025-26) who joined a premier institution. Fill one card per student and submit once.</p>
+  </div>
+
+  <section class="card" id="schoolCard">
+    <p class="step">1 · Your school</p>
+    <p class="muted">Choose your block and school, or type your UDISE number.</p>
+    <div class="grid" style="margin-top:12px">
+      <div class="f"><label>Block <span class="req">*</span></label><select id="block"><option value="">Loading…</option></select></div>
+      <div class="f"><label>School <span class="req">*</span></label><select id="school" disabled><option value="">Choose block first</option></select></div>
+    </div>
+    <div class="or">or</div>
+    <div class="grid">
+      <div class="f"><label>UDISE number <small>(11 digits)</small></label><input id="udiseIn" inputmode="numeric" maxlength="11" placeholder="e.g. 33230104407"></div>
+    </div>
+    <div id="schoolMsg"></div>
+  </section>
+
+  <section id="stuSection" style="display:none">
+    <p class="step" style="margin:6px 0 10px">2 · Students</p>
+    <div id="students"></div>
+    <button class="btn ghost" id="addBtn" type="button">＋ Add another student</button>
+    <div class="note info" style="margin-top:16px">🔒 Entries are sent securely and can be seen only by the SVG Horizon district team. This form cannot show entries after they are submitted. To correct a mistake later, contact the district team with your reference number.</div>
+    <div id="formMsg"></div>
+    <div class="sticky"><span class="muted" id="countTxt"></span><button class="btn amber" id="submitBtn" type="button">Submit all students</button></div>
+  </section>
+</main>
+<footer>SVG Horizon · The Sivagangai District Initiative</footer>
+</div>
+
+<script>
+/* ============================================================
+   SVG Horizon — School Data form
+   Talks to Supabase through two counters only:
+     list_schools()          → the Block / School / UDISE list
+     submit_school_data()    → checks and saves all students (or none)
+   ============================================================ */
+const CFG = { URL: "https://jzuwqxannxfplexdebhm.supabase.co", KEY: "sb_publishable_U1yGU-rGoCfF-GMNVc5AOw_P7RXoKTk" };
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function ls(k, v){ try{ if (v === undefined) return JSON.parse(localStorage.getItem(k)); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
+async function rpc(fn, args = {}){
+  const r = await fetch(`${CFG.URL}/rest/v1/rpc/${fn}`, { method:"POST", headers:{ apikey: CFG.KEY, "Content-Type":"application/json" }, body: JSON.stringify(args) });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}
+
+/* ---------- dropdown lists (from the Master sheet) ---------- */
+const L = {
+  academic_year: ["2023-2024","2024-2025","2025-2026"],
+  community: ["OC","BC","MBC","DNC","SCD","BCM","SC","SCA","ST"],
+  sex: ["Male","Female","Transgender"],
+  religion: ["Hindu","Muslim","Christian","Others"],
+  differently_abled: ["Yes","No"],
+  group_code: ["2502","2702","2704","2503","2708","2608","2601","2707","2980","2972","2981","2977","2982","2973","2971","2602"],
+  stream: ["Agriculture & Allied","Architecture & Planning","Arts & Social Sciences","Aviation","Commerce","Defence","Design & Fashion",
+    "Engineering & Technology","Food Technology","Footwear & Product Design","Forensic Science","Hotel Management & Culinary","Law",
+    "Management (IPM)","Maritime & Marine Engineering","Mathematics & Statistics","Medicine & Dental","Nursing & Allied Health",
+    "Plastics & Polymer Technology","Pure Sciences & Research","Teacher Education","Veterinary & Fisheries","Other"]
+};
+const EXAM_GROUPS = [
+  ["Engineering", ["JEE Main","JEE Advanced","BITSAT","VITEEE","SRMJEEE","COMEDK UGET","KCET","KEAM","MHT CET","AP EAPCET","TS EAPCET","WBJEE","MET (Manipal)","Amrita AEEE","CUSAT CAT"]],
+  ["Medical & Health", ["NEET UG","AIIMS B.Sc Nursing","AIIMS Paramedical","JIPMER B.Sc Nursing & Allied","PGIMER B.Sc Nursing"]],
+  ["Universities & Science", ["CUET UG","IISER Aptitude Test (IAT)","NEST","ISI Admission Test","CMI Entrance"]],
+  ["Law", ["CLAT","AILET","LSAT India","SLAT (Symbiosis)","MH CET Law"]],
+  ["Design, Fashion & Footwear", ["NIFT","NID DAT","UCEED","FDDI AIST","Pearl Academy Entrance"]],
+  ["Architecture & Planning", ["NATA","JEE Main Paper 2 (B.Arch / B.Plan)","CEPT Entrance"]],
+  ["Management", ["IPMAT (IIM Indore)","IPMAT (IIM Rohtak)","JIPMAT","NPAT","SET (Symbiosis)"]],
+  ["Hotel Management & Food", ["NCHM JEE","NIFTEM Entrance"]],
+  ["Agriculture & Veterinary", ["ICAR AIEEA"]],
+  ["Defence, Maritime & Aviation", ["NDA","IMU CET","IGRUA (Pilot Training)"]],
+  ["Other specialised", ["CIPET JEE","NFSU Entrance (NFAT)","NCET (ITEP - Teacher Education)"]]
+];
+const ALL_EXAMS = EXAM_GROUPS.flatMap(g => g[1]);
+
+/* ---------- step 1: school ---------- */
+let SCHOOLS = [], SCHOOL = null;
+function setSchool(s){
+  SCHOOL = s || null;
+  $("schoolMsg").innerHTML = s ? `<div class="school-ok">✓ ${esc(s.name)}<br><span style="font-weight:400">Block: ${esc(s.block)} · UDISE: ${esc(s.udise)}</span></div>` : "";
+  $("stuSection").style.display = s ? "" : "none";
+  if (s){ ls("svh_sd_school", s.udise); if (!document.querySelector(".stu")) restoreDraft(); }
+}
+function fillSchools(block, pick){
+  const list = SCHOOLS.filter(s => s.block === block);
+  $("school").innerHTML = `<option value="">Choose school</option>` + list.map(s => `<option value="${esc(s.udise)}">${esc(s.name)}</option>`).join("");
+  $("school").disabled = !block;
+  if (pick) $("school").value = pick;
+}
+$("block").onchange = () => { fillSchools($("block").value); $("udiseIn").value = ""; setSchool(null); };
+$("school").onchange = () => { const s = SCHOOLS.find(x => x.udise === $("school").value); $("udiseIn").value = s ? s.udise : ""; setSchool(s); };
+$("udiseIn").oninput = () => {
+  const v = $("udiseIn").value.replace(/\D/g, ""); $("udiseIn").value = v;
+  if (v.length < 11){ if (SCHOOL) { setSchool(null); $("block").value = ""; fillSchools(""); } $("schoolMsg").innerHTML = ""; return; }
+  const s = SCHOOLS.find(x => x.udise === v);
+  if (!s){ setSchool(null); $("schoolMsg").innerHTML = `<div class="note err">This UDISE number is not in the school list. Please choose your block and school instead, or contact the district team.</div>`; return; }
+  $("block").value = s.block; fillSchools(s.block, s.udise); setSchool(s);
+};
+async function loadSchools(){
+  try{
+    SCHOOLS = await rpc("list_schools");
+    const blocks = [...new Set(SCHOOLS.map(s => s.block))].sort();
+    $("block").innerHTML = `<option value="">Choose block</option>` + blocks.map(b => `<option>${esc(b)}</option>`).join("");
+    const last = ls("svh_sd_school"), s = SCHOOLS.find(x => x.udise === last);
+    if (s){ $("block").value = s.block; fillSchools(s.block, s.udise); $("udiseIn").value = s.udise; setSchool(s); }
+  }catch(e){ $("block").innerHTML = `<option value="">Could not load</option>`; $("schoolMsg").innerHTML = `<div class="note err">Could not load the school list. Check the internet connection and reload the page.</div>`; }
+}
+
+/* ---------- step 2: student cards ---------- */
+let uid = 0;
+const sel = (name, label, list, req = true) => `<div class="f" data-f="${name}"><label>${label}${req ? ' <span class="req">*</span>' : ""}</label><select name="${name}"><option value="">Choose</option>${list.map(v => `<option>${esc(v)}</option>`).join("")}</select></div>`;
+const inp = (name, label, attrs = "", req = true, hint = "") => `<div class="f" data-f="${name}"><label>${label}${req ? ' <span class="req">*</span>' : ""}${hint ? ` <small>${hint}</small>` : ""}</label><input name="${name}" ${attrs}></div>`;
+
+function addStudent(data){
+  if (document.querySelectorAll(".stu").length >= 50){ alertMsg("warn", "A maximum of 50 students can be sent at once. Submit these first, then add more."); return; }
+  const id = ++uid, el = document.createElement("div");
+  el.className = "stu"; el.dataset.id = id;
+  el.innerHTML = `<div class="stu-h"><b>Student <span class="no"></span></b><button type="button" class="btn ghost small rm">Remove</button></div>
+    <div class="sec">Student</div>
+    <div class="grid">
+      ${inp("emis","EMIS ID",'inputmode="numeric" maxlength="20"')}
+      ${inp("roll_no","Roll No",'maxlength="20"',false,"(12th)")}
+      ${inp("student_name","Name of the Student",'maxlength="100"')}
+      ${sel("academic_year","Academic Year",L.academic_year)}
+      ${sel("community","Community",L.community)}
+      ${sel("sex","Sex",L.sex)}
+      ${sel("religion","Religion",L.religion)}
+      <div class="f" data-f="religion_other" style="display:none"><label>Please specify the religion <span class="req">*</span></label><input name="religion_other" maxlength="40" placeholder="e.g. Jain, Buddhist, Sikh"></div>
+      ${sel("differently_abled","Differently Abled?",L.differently_abled)}
+      ${sel("group_code","Group code",L.group_code)}
+    </div>
+    <div class="sec">Public exam marks</div>
+    <div class="grid">
+      ${inp("mark_10","10th Public Exam Mark",'inputmode="decimal" placeholder="out of 500"')}
+      ${inp("mark_12","12th Public Exam Mark",'inputmode="decimal" placeholder="out of 600"')}
+    </div>
+    <div class="sec">Entrance exams</div>
+    <div class="f" data-f="exams_appeared"><label>Entrance exams appeared <small>(tick all that apply)</small></label>
+      <input class="xsearch" placeholder="🔍 Search an exam (e.g. NEET, CLAT, VIT)" style="margin-bottom:6px">
+      <div class="xbox">${EXAM_GROUPS.map(([g, list]) => `<div class="xg"><h4>${esc(g)}</h4><div class="chips">${list.map(x => `<label><input type="checkbox" value="${esc(x)}"> ${esc(x)}</label>`).join("")}</div></div>`).join("")}</div>
+      <div class="chips custom" style="margin-top:8px"></div>
+      <div class="addx"><input class="xnew" maxlength="60" placeholder="Exam not in the list? Type ONE exam name"><button type="button" class="btn ghost small xadd">＋ Add</button></div></div>
+    <div class="grid" style="margin-top:10px">
+      ${inp("exams_count","No. of Entrance Exams Appeared",'readonly',false,"(counted automatically)")}
+      <div class="f" data-f="exam_passed"><label>Name of the Entrance Exam Passed</label><select name="exam_passed"><option value="">None / Not applicable</option></select></div>
+    </div>
+    <div class="sec">Admission</div>
+    <div class="grid">
+      ${inp("course_joined","Name of the Course joined",'maxlength="120" placeholder="e.g. B.Tech Computer Science"')}
+      ${sel("stream","Stream",L.stream)}
+      ${inp("institution","Name of the Premier Institution joined",'maxlength="160" placeholder="e.g. NIT Tiruchirappalli"')}
+    </div>`;
+  $("students").appendChild(el);
+  el.querySelector(".rm").onclick = () => { if (document.querySelectorAll(".stu").length === 1) return; el.remove(); renumber(); saveDraft(); };
+  const upd = () => { syncExams(el); syncReligion(el); saveDraft(); };
+  el.querySelector(".xsearch").addEventListener("input", ev => {
+    const q = ev.target.value.trim().toLowerCase();
+    el.querySelectorAll(".xg").forEach(g => { let any = false;
+      g.querySelectorAll("label").forEach(l => { const show = !q || l.textContent.toLowerCase().includes(q); l.style.display = show ? "" : "none"; if (show) any = true; });
+      g.style.display = any ? "" : "none"; });
+  });
+  const addNew = () => { const inpx = el.querySelector(".xnew"), name = inpx.value.replace(/,/g, " ").replace(/\s+/g, " ").trim(); if (!name) return;
+    const known = ALL_EXAMS.find(x => x.toLowerCase() === name.toLowerCase());
+    if (known){ el.querySelector(`.xbox input[value="${CSS.escape(known)}"]`).checked = true; } else addCustom(el, name);
+    inpx.value = ""; upd(); };
+  el.querySelector(".xadd").onclick = addNew;
+  el.querySelector(".xnew").addEventListener("keydown", ev => { if (ev.key === "Enter"){ ev.preventDefault(); addNew(); } });
+  el.querySelectorAll("input:not(.xsearch):not(.xnew),select").forEach(x => { x.addEventListener("input", upd); x.addEventListener("change", upd); });
+  if (data) setData(el, data);
+  syncExams(el); syncReligion(el); renumber();
+}
+function addCustom(el, name){
+  const box = el.querySelector(".chips.custom");
+  if ([...box.querySelectorAll("input")].some(c => c.value.toLowerCase() === name.toLowerCase())) return;
+  const l = document.createElement("label"); l.className = "on";
+  l.innerHTML = `<input type="checkbox" checked value="${esc(name)}"> ${esc(name)} ✕`;
+  l.querySelector("input").addEventListener("change", () => { l.remove(); syncExams(el); saveDraft(); });
+  box.appendChild(l);
+}
+function syncReligion(el){
+  const on = el.querySelector('[name="religion"]').value === "Others";
+  el.querySelector('[data-f="religion_other"]').style.display = on ? "" : "none";
+}
+function examsList(el){
+  return [...new Set([...el.querySelectorAll(".chips input:checked")].map(x => x.value))];
+}
+function syncExams(el){
+  el.querySelectorAll(".chips label").forEach(l => l.classList.toggle("on", l.querySelector("input").checked));
+  const list = examsList(el), ps = el.querySelector('[name="exam_passed"]'), cur = ps.value;
+  el.querySelector('[name="exams_count"]').value = list.length;
+  ps.innerHTML = `<option value="">None / Not applicable</option>` + list.map(x => `<option>${esc(x)}</option>`).join("");
+  if (list.includes(cur)) ps.value = cur;
+}
+function getData(el){
+  const v = n => (el.querySelector(`[name="${n}"]`).value || "").trim();
+  const ex = examsList(el);
+  return { emis: v("emis"), roll_no: v("roll_no"), student_name: v("student_name"), academic_year: v("academic_year"), community: v("community"),
+    sex: v("sex"), religion: v("religion") === "Others" ? (v("religion_other") ? `Others (${v("religion_other")})` : "Others") : v("religion"), differently_abled: v("differently_abled"), group_code: v("group_code"),
+    mark_10: v("mark_10"), mark_12: v("mark_12"), exams_count: String(ex.length), exams_appeared: ex.join(", "), exam_passed: v("exam_passed"),
+    course_joined: v("course_joined"), stream: v("stream"), institution: v("institution") };
+}
+function setData(el, d){
+  for (const [k, val] of Object.entries(d)){
+    if (k === "exams_appeared"){ const list = String(val || "").split(",").map(s => s.trim()).filter(Boolean);
+      list.forEach(x => { const cb = [...el.querySelectorAll(".xbox input")].find(c => c.value === x); if (cb) cb.checked = true; else addCustom(el, x); });
+      continue; }
+    if (k === "religion" && /^Others/.test(val || "")){ el.querySelector('[name="religion"]').value = "Others";
+      el.querySelector('[name="religion_other"]').value = (String(val).match(/^Others \((.*)\)$/) || [,""])[1]; continue; }
+    const f = el.querySelector(`[name="${k}"]`); if (f && k !== "exams_count" && k !== "exam_passed") f.value = val;
+  }
+  syncExams(el); syncReligion(el);
+  if (d.exam_passed) el.querySelector('[name="exam_passed"]').value = d.exam_passed;
+}
+function renumber(){
+  const all = document.querySelectorAll(".stu");
+  all.forEach((el, i) => { el.querySelector(".no").textContent = i + 1; el.querySelector(".rm").style.visibility = all.length > 1 ? "" : "hidden"; });
+  $("countTxt").textContent = `${all.length} student${all.length > 1 ? "s" : ""} in this form`;
+}
+const cards = () => [...document.querySelectorAll(".stu")];
+function saveDraft(){ if (SCHOOL) ls("svh_sd_draft_" + SCHOOL.udise, cards().map(getData)); }
+function restoreDraft(){
+  $("students").innerHTML = "";
+  const d = SCHOOL && ls("svh_sd_draft_" + SCHOOL.udise);
+  if (d && d.length){ d.forEach(x => addStudent(x)); alertMsg("info", "Your unsent entries were restored on this device."); }
+  else addStudent();
+}
+$("addBtn").onclick = () => { addStudent(); const last = cards().pop(); last.scrollIntoView({ behavior: "smooth", block: "start" }); };
+
+/* ---------- checks before sending (the server checks again) ---------- */
+function alertMsg(type, html){ $("formMsg").innerHTML = html ? `<div class="note ${type}">${html}</div>` : ""; }
+function markErr(el, field, msg){
+  const f = el.querySelector(`[data-f="${field}"]`) || el.querySelector(".stu-h");
+  f.classList.add("bad"); el.classList.add("has-err");
+  const e = document.createElement("div"); e.className = "err"; e.textContent = msg; f.appendChild(e);
+}
+function clearErr(){ document.querySelectorAll(".bad").forEach(x => x.classList.remove("bad")); document.querySelectorAll(".has-err").forEach(x => x.classList.remove("has-err")); document.querySelectorAll(".f .err, .stu-h .err").forEach(x => x.remove()); }
+function check(){
+  clearErr(); let bad = 0; const seen = {};
+  cards().forEach(el => {
+    const d = getData(el), e = (f, m) => { markErr(el, f, m); bad++; };
+    if (!/^[0-9]{6,20}$/.test(d.emis)) e("emis", "Digits only (6 to 20)");
+    else if (seen[d.emis]) e("emis", "Same EMIS ID entered twice"); else seen[d.emis] = 1;
+    if (!d.student_name) e("student_name", "Required");
+    ["academic_year","community","sex","religion","differently_abled","group_code","stream"].forEach(k => { if (!d[k]) e(k, "Please choose"); });
+    if (d.religion === "Others") e("religion_other", "Please type the religion");
+    const m10 = Number(d.mark_10), m12 = Number(d.mark_12);
+    if (d.mark_10 === "" || isNaN(m10) || m10 < 0 || m10 > 500) e("mark_10", "Between 0 and 500");
+    if (d.mark_12 === "" || isNaN(m12) || m12 < 0 || m12 > 600) e("mark_12", "Between 0 and 600");
+    if (!d.course_joined) e("course_joined", "Required");
+    if (!d.institution) e("institution", "Required");
+  });
+  return bad;
+}
+
+/* ---------- submit ---------- */
+$("submitBtn").onclick = async () => {
+  if (!SCHOOL) return;
+  const n = check();
+  if (n){ alertMsg("err", `Please fix ${n} item${n > 1 ? "s" : ""} marked in red.`); document.querySelector(".has-err").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  const list = cards().map(getData);
+  if (!confirm(`Send ${list.length} student${list.length > 1 ? "s" : ""} for ${SCHOOL.name}?\n\nAfter sending, entries cannot be viewed or changed from this form.`)) return;
+  const b = $("submitBtn"); b.disabled = true; b.textContent = "Sending…"; alertMsg();
+  try{
+    const r = await rpc("submit_school_data", { p_udise: SCHOOL.udise, p_students: list });
+    if (r.ok){
+      ls("svh_sd_draft_" + SCHOOL.udise, null);
+      $("app").innerHTML = `<div class="card done" style="margin-top:28px"><div style="font-size:46px">✅</div>
+        <div class="big">${r.count} student${r.count > 1 ? "s" : ""} submitted</div>
+        <p style="font-size:18px">${esc(r.school)}</p>
+        <p style="font-size:22px;margin:14px 0">Reference number: <b>${esc(r.ref_no)}</b></p>
+        <p class="muted">Please take a screenshot of this page. Quote the reference number if anything needs correction.<br>
+        <span class="ta">இந்தப் பக்கத்தை ஸ்கிரீன்ஷாட் எடுத்து வைத்துக்கொள்ளவும்.</span></p>
+        <a class="btn amber" href="school-data.html" style="margin-top:14px;text-decoration:none">Submit more students</a></div>`;
+      window.scrollTo(0, 0); return;
+    }
+    if (r.error === "CHECK_FAILED"){
+      const els = cards();
+      r.problems.forEach(p => { const el = els[p.row - 1]; if (!el) return;
+        const field = /EMIS/.test(p.error) ? "emis" : /10th/.test(p.error) ? "mark_10" : /12th/.test(p.error) ? "mark_12" : /course/i.test(p.error) ? "course_joined" : /institution/i.test(p.error) ? "institution" : /religion/i.test(p.error) ? "religion" : /exams/i.test(p.error) ? "exams_appeared" : null;
+        markErr(el, field || "x", p.error); });
+      alertMsg("err", `The server found ${r.problems.length} problem${r.problems.length > 1 ? "s" : ""}. Nothing was saved. Please fix the items marked in red and send again.`);
+      document.querySelector(".has-err")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (r.error === "UNKNOWN_SCHOOL") alertMsg("err", "This school is not in the list. Please reload the page and choose your school again.");
+    else alertMsg("err", "Something went wrong (" + esc(r.error) + "). Please try again.");
+  }catch(err){ alertMsg("err", "Could not reach the server. Your entries are kept on this device. Check the internet connection and press Submit again."); }
+  b.disabled = false; b.textContent = "Submit all students";
+};
+
+/* ---------- theme button (same as the rest of the site) ---------- */
+const tb = $("themeBtn");
+const isDark = () => document.documentElement.getAttribute("data-theme") === "dark" || (!document.documentElement.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+tb.textContent = isDark() ? "Light" : "Dark";
+tb.onclick = () => { const d = isDark(); document.documentElement.setAttribute("data-theme", d ? "light" : "dark"); tb.textContent = d ? "Dark" : "Light"; };
+
+loadSchools();
+</script>
+</body>
+</html>
