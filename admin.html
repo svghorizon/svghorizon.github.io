@@ -100,6 +100,7 @@
       <button data-tab="exams" class="on">📅 Exams</button>
       <button data-tab="editor">➕ New exam</button>
       <button data-tab="results">📊 Results</button>
+      <button data-tab="schooldata">🏫 School Data</button>
       <button data-tab="settings">⚙️ Settings</button>
     </nav>
 
@@ -202,6 +203,54 @@
         <div id="resMsg"></div>
       </div>
       <div id="resBody"></div>
+    </div>
+
+    <!-- ---------- SCHOOL DATA ---------- -->
+    <div id="tab-schooldata" class="hidden">
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><h2 style="margin:0">🏫 Premier Institution students · School Data</h2>
+          <div class="row"><a class="btn sec small" href="school-data.html" target="_blank" style="text-decoration:none">Open the school form ↗</a>
+          <button class="btn sec small" id="sdReload">↻ Refresh</button></div></div>
+        <div id="sdMsg"></div>
+        <div class="stats" id="sdStats" style="margin-top:12px"></div>
+        <div style="height:12px"></div>
+        <div class="row"><select id="sdExpScope" style="width:auto"><option value="Approved">Approved only</option><option value="ApprovedPending">Approved + Pending</option><option value="All">All (incl. rejected)</option></select>
+          <button class="btn" id="sdExport">⬇ Download Excel (Format layout)</button></div>
+      </div>
+
+      <div class="card"><h2>📍 Tracker · which schools have submitted</h2><div class="tbl" id="sdTracker"></div></div>
+
+      <div class="card">
+        <h2>📋 Entries</h2>
+        <div class="grid">
+          <div><label>Status</label><select id="sdfStatus"><option value="">All</option><option selected>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+          <div><label>Block</label><select id="sdfBlock"><option value="">All</option></select></div>
+          <div><label>School</label><select id="sdfSchool"><option value="">All</option></select></div>
+          <div><label>Academic Year</label><select id="sdfYear"><option value="">All</option><option>2023-2024</option><option>2024-2025</option><option>2025-2026</option></select></div>
+          <div><label>Search (name / EMIS / ref)</label><input id="sdfQ"></div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="row"><button class="btn small" id="sdApprove">✓ Approve selected</button><button class="btn bad small" id="sdReject">✗ Reject selected</button><span class="muted" id="sdCount"></span></div>
+        <div class="tbl" style="margin-top:10px"><table id="sdTable"><thead><tr><th><input type="checkbox" id="sdAll"></th><th>Ref</th><th>School</th><th>EMIS</th><th>Name</th><th>Year</th><th>Stream</th><th>Institution</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+
+      <div class="card hidden" id="sdEditCard">
+        <div class="row" style="justify-content:space-between"><h2 style="margin:0" id="sdEditTitle">Edit entry</h2><button class="btn sec small" id="sdEditClose">Close</button></div>
+        <div class="grid" id="sdEditForm" style="margin-top:12px"></div>
+        <div style="height:12px"></div>
+        <div class="row"><button class="btn" id="sdEditSave">Save changes</button></div>
+        <div id="sdEditMsg"></div>
+      </div>
+
+      <div class="card">
+        <h2>⚙️ School list (one-time setup, update any time)</h2>
+        <p class="muted">In your Google Sheet: <b>File → Download → Microsoft Excel (.xlsx)</b>, then choose that file here. It reads the <b>Master</b> tab columns <b>Block · UDISE_Code · School Name · Management · Management Type · Category · Category Type</b>. Existing schools are updated; new ones are added; nothing is deleted.</p>
+        <p id="sdSchoolCount" class="muted"></p>
+        <input type="file" id="sdSchoolFile" accept=".xlsx,.xls,.csv">
+        <div id="sdSchoolPreview"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="sdSchoolSave" disabled>Save school list</button></div>
+        <div id="sdSchoolMsg"></div>
+      </div>
     </div>
 
     <!-- ---------- SETTINGS ---------- -->
@@ -308,7 +357,8 @@ sb.auth.getSession().then(({data}) => { if (data.session) afterLogin(data.sessio
 document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
 function showTab(t){
   document.querySelectorAll("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
-  ["exams","editor","results","settings"].forEach(x => $("tab-"+x).classList.toggle("hidden", x !== t));
+  ["exams","editor","results","schooldata","settings"].forEach(x => $("tab-"+x).classList.toggle("hidden", x !== t));
+  if (t === "schooldata") loadSD();
   if (t === "results") fillResultExams();
 }
 
@@ -768,6 +818,169 @@ $("btnCleanup").onclick = async () => {
   let n = 0;
   for (const e of old){ const { count, error } = await sb.from("attempts").delete({ count:"exact" }).eq("exam_id", e.id); if (error) return msg("cleanMsg","err", esc(error.message)); n += count || 0; }
   msg("cleanMsg","ok",`Deleted ${n} attempt(s) from ${old.length} exam(s).`);
+};
+
+/* =====================================================================
+   SCHOOL DATA (premier institution students)
+   ===================================================================== */
+const SD = { schools: [], rows: [], loaded: false, editId: null, upload: null };
+const SD_FORMAT = ["S No","Block Name","UDISE No","School Name","EMIS ID","Roll No","Name of the Student","Academic Year","Community","Sex","Religion",
+  "Differently Abled ?","Group code","10th Public Exam Mark","12th Publlic Exam Mark","No of Entrance Exam Appeared ?",
+  "List the Name of the Entrance Exam Appeared (Ex - CLAT, JEE, NIFT)","Name of the Entrance Exam Passed","Name of the Course joined",
+  "Name of the stream like Engineering, Medicine etc","Name of the Premier Institution joined ?"];
+const SD_FIELDS = [["emis","EMIS ID"],["roll_no","Roll No"],["student_name","Name of the Student"],["academic_year","Academic Year"],["community","Community"],
+  ["sex","Sex"],["religion","Religion"],["differently_abled","Differently Abled ?"],["group_code","Group code"],["mark_10","10th mark"],["mark_12","12th mark"],
+  ["exams_count","No of exams appeared"],["exams_appeared","Exams appeared"],["exam_passed","Exam passed"],["course_joined","Course joined"],
+  ["stream","Stream"],["institution","Premier Institution"],["admin_note","Admin note (not exported)"]];
+const sdSchool = u => SD.schools.find(s => s.udise === u) || { block: "", name: "(unknown " + u + ")" };
+
+async function loadSD(){
+  msg("sdMsg","info","Loading…");
+  try{
+    const { data: sc, error: e1 } = await sb.from("schools").select("*").order("block").order("name");
+    if (e1) throw e1;
+    let rows = [];
+    for (let from = 0; ; from += 1000){
+      const { data, error } = await sb.from("premier_students").select("*").order("id", { ascending: false }).range(from, from + 999);
+      if (error) throw error;
+      rows = rows.concat(data); if (data.length < 1000) break;
+    }
+    SD.schools = sc || []; SD.rows = rows; SD.loaded = true;
+    const blocks = [...new Set(SD.schools.map(s => s.block))].sort();
+    const keepB = $("sdfBlock").value;
+    $("sdfBlock").innerHTML = `<option value="">All</option>` + blocks.map(b => `<option>${esc(b)}</option>`).join("");
+    $("sdfBlock").value = keepB; sdFillSchoolFilter();
+    $("sdSchoolCount").textContent = `Schools in the list now: ${SD.schools.length}`;
+    msg("sdMsg"); sdRender();
+  }catch(err){ msg("sdMsg","err", esc(err.message)); }
+}
+$("sdReload").onclick = loadSD;
+function sdFillSchoolFilter(){
+  const b = $("sdfBlock").value, keep = $("sdfSchool").value;
+  $("sdfSchool").innerHTML = `<option value="">All</option>` + SD.schools.filter(s => !b || s.block === b).map(s => `<option value="${esc(s.udise)}">${esc(s.name)}</option>`).join("");
+  $("sdfSchool").value = keep;
+}
+["sdfStatus","sdfBlock","sdfSchool","sdfYear"].forEach(i => $(i).addEventListener("change", () => { if (i === "sdfBlock") sdFillSchoolFilter(); sdRender(); }));
+$("sdfQ").addEventListener("input", () => sdRender());
+
+function sdRender(){
+  const R = SD.rows, live = R.filter(r => r.status !== "Rejected");
+  const subm = new Set(live.map(r => r.udise));
+  const cnt = st => R.filter(r => r.status === st).length;
+  $("sdStats").innerHTML = `
+    <div class="stat"><b>${live.length}</b><span>students (not rejected)</span></div>
+    <div class="stat"><b>${cnt("Pending")}</b><span>pending review</span></div>
+    <div class="stat"><b>${cnt("Approved")}</b><span>approved</span></div>
+    <div class="stat"><b>${cnt("Rejected")}</b><span>rejected</span></div>
+    <div class="stat"><b>${subm.size} / ${SD.schools.filter(s => s.active).length}</b><span>schools submitted</span></div>`;
+  // tracker
+  const byB = {};
+  SD.schools.filter(s => s.active).forEach(s => { (byB[s.block] = byB[s.block] || { done: [], todo: [], n: 0 })[subm.has(s.udise) ? "done" : "todo"].push(s); });
+  live.forEach(r => { const b = sdSchool(r.udise).block; if (byB[b]) byB[b].n++; });
+  $("sdTracker").innerHTML = `<table><thead><tr><th>Block</th><th>Schools</th><th>Submitted</th><th>Students</th><th>Not yet submitted</th></tr></thead><tbody>${
+    Object.entries(byB).sort().map(([b, x]) => `<tr><td><b>${esc(b)}</b></td><td>${x.done.length + x.todo.length}</td><td>${x.done.length}</td><td>${x.n}</td>
+      <td class="muted">${x.todo.length ? x.todo.map(s => esc(s.name)).join("<br>") : "✓ all submitted"}</td></tr>`).join("") || `<tr><td colspan="5" class="muted">Upload the school list first (bottom of this tab).</td></tr>`}</tbody></table>`;
+  // entries
+  const f = { st: $("sdfStatus").value, b: $("sdfBlock").value, u: $("sdfSchool").value, y: $("sdfYear").value, q: $("sdfQ").value.trim().toLowerCase() };
+  const list = R.filter(r => (!f.st || r.status === f.st) && (!f.b || sdSchool(r.udise).block === f.b) && (!f.u || r.udise === f.u) && (!f.y || r.academic_year === f.y)
+    && (!f.q || [r.student_name, r.emis, r.ref_no].join(" ").toLowerCase().includes(f.q)));
+  $("sdCount").textContent = `${list.length} shown`;
+  const pill = st => `<span class="pill ${st === "Approved" ? "p-sched" : st === "Rejected" ? "p-draft" : "p-live"}">${st}</span>`;
+  $("sdTable").querySelector("tbody").innerHTML = list.slice(0, 1000).map(r => { const s = sdSchool(r.udise); return `<tr>
+    <td><input type="checkbox" class="sdChk" value="${r.id}"></td><td>${esc(r.ref_no)}</td>
+    <td>${esc(s.name)}<div class="muted">${esc(s.block)}</div></td><td>${esc(r.emis)}</td><td>${esc(r.student_name)}</td><td>${esc(r.academic_year)}</td>
+    <td>${esc(r.stream)}</td><td>${esc(r.institution)}<div class="muted">${esc(r.course_joined)}</div></td><td>${pill(r.status)}${r.admin_note ? `<div class="muted">${esc(r.admin_note)}</div>` : ""}</td>
+    <td><button class="btn sec small" data-edit="${r.id}">✏️</button></td></tr>`; }).join("") || `<tr><td colspan="10" class="muted">No entries for these filters.</td></tr>`;
+  $("sdAll").checked = false;
+  document.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => sdEdit(+b.dataset.edit));
+}
+$("sdAll").onchange = () => document.querySelectorAll(".sdChk").forEach(c => c.checked = $("sdAll").checked);
+
+async function sdSetStatus(status){
+  const ids = [...document.querySelectorAll(".sdChk:checked")].map(c => +c.value);
+  if (!ids.length) return msg("sdMsg","warn","Tick at least one entry first.");
+  let note = null;
+  if (status === "Rejected"){ note = prompt(`Reject ${ids.length} entr${ids.length > 1 ? "ies" : "y"}? Reason (optional):`, ""); if (note === null) return; }
+  const upd = { status, reviewed_at: new Date().toISOString() }; if (note) upd.admin_note = note;
+  const { error } = await sb.from("premier_students").update(upd).in("id", ids);
+  if (error) return msg("sdMsg","err", esc(error.message));
+  msg("sdMsg","ok", `${ids.length} entr${ids.length > 1 ? "ies" : "y"} marked ${status}.`); loadSD();
+}
+$("sdApprove").onclick = () => sdSetStatus("Approved");
+$("sdReject").onclick = () => sdSetStatus("Rejected");
+
+function sdEdit(id){
+  const r = SD.rows.find(x => x.id === id); if (!r) return;
+  SD.editId = id; const s = sdSchool(r.udise);
+  $("sdEditTitle").textContent = `Edit · ${r.ref_no} · ${s.name}`;
+  $("sdEditForm").innerHTML = SD_FIELDS.map(([k, lab]) => `<div><label>${esc(lab)}</label><input data-k="${k}" value="${esc(r[k] ?? "")}"></div>`).join("")
+    + `<div><label>Status</label><select data-k="status">${["Pending","Approved","Rejected"].map(x => `<option ${x === r.status ? "selected" : ""}>${x}</option>`).join("")}</select></div>`;
+  msg("sdEditMsg"); $("sdEditCard").classList.remove("hidden"); $("sdEditCard").scrollIntoView({ behavior: "smooth" });
+}
+$("sdEditClose").onclick = () => $("sdEditCard").classList.add("hidden");
+$("sdEditSave").onclick = async () => {
+  const upd = {}; document.querySelectorAll("#sdEditForm [data-k]").forEach(i => { const v = i.value.trim(); upd[i.dataset.k] = v === "" ? null : v; });
+  for (const k of ["mark_10","mark_12","exams_count"]) if (upd[k] !== null && isNaN(Number(upd[k]))) return msg("sdEditMsg","err", `${k} must be a number.`);
+  if (!/^[0-9]{6,20}$/.test(upd.emis || "")) return msg("sdEditMsg","err","EMIS ID must be 6–20 digits.");
+  upd.reviewed_at = new Date().toISOString();
+  const { error } = await sb.from("premier_students").update(upd).eq("id", SD.editId);
+  if (error) return msg("sdEditMsg","err", esc(/duplicate|unique/i.test(error.message) ? "Another entry already has this EMIS ID." : error.message));
+  msg("sdEditMsg","ok","Saved."); loadSD();
+};
+
+$("sdExport").onclick = () => {
+  const sc = $("sdExpScope").value;
+  const rows = SD.rows.filter(r => sc === "All" || r.status === "Approved" || (sc === "ApprovedPending" && r.status === "Pending"))
+    .map(r => ({ r, s: sdSchool(r.udise) }))
+    .sort((a, b) => (a.s.block + a.s.name + a.r.student_name).localeCompare(b.s.block + b.s.name + b.r.student_name));
+  if (!rows.length) return msg("sdMsg","warn","Nothing to download for this choice.");
+  const num = v => (v === null || v === undefined || v === "") ? "" : Number(v);
+  const aoa = [SD_FORMAT, ...rows.map(({ r, s }, i) => [i + 1, s.block, r.udise, s.name, r.emis, r.roll_no || "", r.student_name, r.academic_year, r.community, r.sex,
+    r.religion, r.differently_abled, r.group_code, num(r.mark_10), num(r.mark_12), num(r.exams_count), r.exams_appeared || "", r.exam_passed || "",
+    r.course_joined, r.stream, r.institution])];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"] = SD_FORMAT.map((h, i) => ({ wch: [5,13,13,38,14,9,24,11,10,10,10,9,9,9,9,9,30,22,26,26,34][i] }));
+  rows.forEach((_, i) => { [2, 4].forEach(c => { const cell = ws[XLSX.utils.encode_cell({ r: i + 1, c })]; if (cell) { cell.t = "s"; cell.v = String(cell.v); } }); });
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Format");
+  XLSX.writeFile(wb, `Premier_Institution_Students_${new Date().toISOString().slice(0,10)}.xlsx`);
+};
+
+// ---------- school list upload ----------
+$("sdSchoolFile").onchange = async ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  SD.upload = null; $("sdSchoolSave").disabled = true; $("sdSchoolPreview").innerHTML = ""; msg("sdSchoolMsg");
+  try{
+    const wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
+    const ws = wb.Sheets["Master"] || wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
+    const H = (rows[0] || []).map(h => String(h).trim().toLowerCase());
+    const col = (...names) => { for (const n of names){ const i = H.indexOf(n); if (i >= 0) return i; } return -1; };
+    const c = { udise: col("udise_code","udise no","udise"), block: col("block"), name: col("school name"), m: col("management"), mt: col("management type"), cat: col("category"), ct: col("category type") };
+    if (c.udise < 0 || c.block < 0 || c.name < 0) throw new Error("Could not find the columns Block, UDISE_Code and School Name in row 1 of the Master tab.");
+    const list = [], bad = [];
+    rows.slice(1).forEach((r, i) => {
+      const u = String(r[c.udise] || "").replace(/\D/g, "");
+      if (!u && !String(r[c.name] || "").trim()) return;
+      if (u.length !== 11 || !String(r[c.block]).trim() || !String(r[c.name]).trim()){ bad.push(i + 2); return; }
+      list.push({ udise: u, block: String(r[c.block]).trim(), name: String(r[c.name]).trim().replace(/\s+/g, " "),
+        management: c.m >= 0 ? String(r[c.m]).trim() || null : null, management_type: c.mt >= 0 ? String(r[c.mt]).trim() || null : null,
+        category: c.cat >= 0 ? String(r[c.cat]).trim() || null : null, category_type: c.ct >= 0 ? String(r[c.ct]).trim() || null : null,
+        active: true, updated_at: new Date().toISOString() });
+    });
+    const dup = list.map(x => x.udise).filter((u, i, a) => a.indexOf(u) !== i);
+    if (dup.length) throw new Error("The same UDISE appears twice: " + [...new Set(dup)].join(", "));
+    const byB = {}; list.forEach(x => byB[x.block] = (byB[x.block] || 0) + 1);
+    $("sdSchoolPreview").innerHTML = `<div class="msg ok">Found <b>${list.length} schools</b> in ${Object.keys(byB).length} blocks: ${Object.entries(byB).sort().map(([b, n]) => `${esc(b)} ${n}`).join(" · ")}</div>`
+      + (bad.length ? `<div class="msg warn">Skipped rows (missing block/name or UDISE not 11 digits): ${bad.join(", ")}</div>` : "");
+    SD.upload = list; $("sdSchoolSave").disabled = !list.length;
+  }catch(err){ msg("sdSchoolMsg","err", esc(err.message)); }
+};
+$("sdSchoolSave").onclick = async () => {
+  if (!SD.upload) return;
+  $("sdSchoolSave").disabled = true;
+  const { error } = await sb.from("schools").upsert(SD.upload, { onConflict: "udise" });
+  if (error){ msg("sdSchoolMsg","err", esc(error.message)); $("sdSchoolSave").disabled = false; return; }
+  msg("sdSchoolMsg","ok", `✓ Saved ${SD.upload.length} schools. The school form now shows them.`); SD.upload = null; $("sdSchoolFile").value = ""; loadSD();
 };
 
 resetEditor();
